@@ -10,6 +10,9 @@ soltar, atualização em tempo real e ambiente completo com Docker.
 - Criação, edição e exclusão de quadros
 - Criação, renomeação, reordenação e exclusão de listas
 - Criação, edição, movimentação e exclusão de cartões
+- Etiquetas coloridas compartilhadas entre cartões do quadro
+- Prazos com destaque visual e alerta em tempo real quando estão próximos
+- Checklists com itens marcáveis e progresso exibido no cartão
 - Arrastar e soltar cartões entre listas
 - Atualizações em tempo real com salas privadas por quadro
 - Interface responsiva com estados de carregamento, erro e notificações
@@ -209,6 +212,11 @@ Todas as rotas, exceto cadastro e login, exigem o cabeçalho
 | `POST` | `/lists/:listId/cards` | Cria um cartão |
 | `PATCH` | `/cards/:id` | Atualiza ou move um cartão |
 | `DELETE` | `/cards/:id` | Exclui um cartão |
+| `POST` | `/boards/:boardId/labels` | Cria uma etiqueta |
+| `POST` | `/cards/:cardId/labels/:labelId` | Vincula uma etiqueta |
+| `POST` | `/cards/:cardId/checklists` | Cria um checklist |
+| `POST` | `/checklists/:checklistId/items` | Cria um item de checklist |
+| `PATCH` | `/checklist-items/:id` | Atualiza um item de checklist |
 | `GET` | `/health` | Verifica a API e o banco |
 
 ## Tempo real
