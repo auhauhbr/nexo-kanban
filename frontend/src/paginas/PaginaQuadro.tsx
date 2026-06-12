@@ -1,5 +1,5 @@
 ﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Columns3 } from "lucide-react";
+import { ArrowLeft, Columns3, Wifi } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -219,6 +219,10 @@ export function PaginaQuadro() {
   }
 
   const quadro = consultaQuadro.data;
+  const quantidadeCartoes = quadro.lists.reduce(
+    (total, lista) => total + lista.cards.length,
+    0
+  );
   const soltarCartao = (idListaDestino: string, posicaoDestino: number) => {
     if (!idCartaoArrastado || movimentacaoCartao.isPending) {
       return;
@@ -254,35 +258,40 @@ export function PaginaQuadro() {
       </header>
 
       <section className="barra-quadro">
-        <div>
-          <span>
+        <div className="conteudo-barra-quadro">
+          <span className="icone-titulo-quadro">
             <Columns3 size={19} />
           </span>
-          <div>
+          <div className="titulo-quadro">
             <h1>{quadro.title}</h1>
             <p>
               {quadro.lists.length}{" "}
               {quadro.lists.length === 1 ? "lista" : "listas"}
+              <i aria-hidden="true" />
+              {quantidadeCartoes}{" "}
+              {quantidadeCartoes === 1 ? "cartão" : "cartões"}
             </p>
           </div>
-          <MenuQuadro
-            aoExcluir={() => exclusaoQuadro.mutateAsync(idQuadro)}
-            aoSalvar={(titulo) =>
-              edicaoQuadro.mutateAsync({ idQuadro, titulo })
-            }
-            erro={mensagemErroQuadro}
-            excluindo={exclusaoQuadro.isPending}
-            quantidadeListas={quadro.lists.length}
-            salvando={edicaoQuadro.isPending}
-            titulo={quadro.title}
-          />
-          <span
-            className={`estado-tempo-real estado-tempo-real-${estadoTempoReal}`}
-            title={`Tempo real: ${estadoTempoReal}`}
-          >
-            <i />
-            {rotulosTempoReal[estadoTempoReal]}
-          </span>
+          <div className="acoes-quadro">
+            <span
+              className={`estado-tempo-real estado-tempo-real-${estadoTempoReal}`}
+              title={`Tempo real: ${estadoTempoReal}`}
+            >
+              <Wifi aria-hidden="true" size={14} />
+              <span>{rotulosTempoReal[estadoTempoReal]}</span>
+            </span>
+            <MenuQuadro
+              aoExcluir={() => exclusaoQuadro.mutateAsync(idQuadro)}
+              aoSalvar={(titulo) =>
+                edicaoQuadro.mutateAsync({ idQuadro, titulo })
+              }
+              erro={mensagemErroQuadro}
+              excluindo={exclusaoQuadro.isPending}
+              quantidadeListas={quadro.lists.length}
+              salvando={edicaoQuadro.isPending}
+              titulo={quadro.title}
+            />
+          </div>
         </div>
       </section>
 
