@@ -12,11 +12,13 @@ const inclusaoDetalhesQuadro = {
     }
   },
   lists: {
+    where: { archived: false },
     orderBy: {
       position: "asc"
     },
     include: {
       cards: {
+        where: { archived: false },
         orderBy: {
           position: "asc"
         },
@@ -37,6 +39,12 @@ const inclusaoDetalhesQuadro = {
                 }
               }
             }
+          },
+          attachments: { orderBy: { createdAt: "desc" } },
+          activities: {
+            orderBy: { createdAt: "desc" },
+            take: 50,
+            include: { user: { select: { id: true, name: true } } }
           }
         }
       }

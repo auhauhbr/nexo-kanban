@@ -19,6 +19,12 @@ const inclusaoDetalhesCartao = {
         }
       }
     }
+  },
+  attachments: { orderBy: { createdAt: "desc" } },
+  activities: {
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    include: { user: { select: { id: true, name: true } } }
   }
 } as const;
 
@@ -85,9 +91,26 @@ export const criarCartao = async (
         title: entrada.title,
         description: entrada.description,
         position: (ultimoCartao?.position ?? -1) + 1,
+        number: lista.boardId
+          ? (
+              await transacao.board.update({
+                where: { id: lista.boardId },
+                data: { nextCardNumber: { increment: 1 } },
+                select: { nextCardNumber: true }
+              })
+            ).nextCardNumber - 1
+          : 0,
         listId: idLista
       },
       include: inclusaoDetalhesCartao
+    });
+    await transacao.activity.create({
+      data: {
+        cardId: cartao.id,
+        userId: idProprietario,
+        type: "create",
+        message: "criou este cartão"
+      }
     });
 
     await transacao.board.update({
@@ -203,10 +226,25 @@ export const atualizarCartao = async (
         title: entrada.title,
         description: entrada.description,
         dueDate: entrada.dueDate,
+        coverColor: entrada.coverColor,
+        archived: entrada.archived,
         listId: idListaDestino,
         position: posicao
       },
       include: inclusaoDetalhesCartao
+    });
+    const mudouLista = idListaDestino !== cartao.listId;
+    await transacao.activity.create({
+      data: {
+        cardId: idCartao,
+        userId: idProprietario,
+        type: mudouLista ? "move" : entrada.archived ? "archive" : "update",
+        message: mudouLista
+          ? "moveu este cartão para outra lista"
+          : entrada.archived
+            ? "arquivou este cartão"
+            : "atualizou este cartão"
+      }
     });
 
     await transacao.board.update({

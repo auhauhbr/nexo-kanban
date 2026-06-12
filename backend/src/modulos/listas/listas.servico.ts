@@ -119,7 +119,8 @@ export const atualizarLista = async (
       where: { id: idLista },
       data: {
         title: entrada.title,
-        position: posicao
+        position: posicao,
+        archived: entrada.archived
       },
       include: {
         cards: {

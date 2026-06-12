@@ -15,6 +15,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   boards    Board[]
+  activities Activity[]
 }
 
 model Board {
@@ -26,6 +27,7 @@ model Board {
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   lists     List[]
   labels    Label[]
+  nextCardNumber Int @default(1)
 
   @@index([ownerId])
 }
@@ -39,6 +41,7 @@ model List {
   updatedAt DateTime @updatedAt
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   cards     Card[]
+  archived  Boolean  @default(false)
 
   @@index([boardId, position])
 }
@@ -48,6 +51,9 @@ model Card {
   title       String
   description String?
   dueDate     DateTime?
+  number      Int      @default(0)
+  coverColor  String?
+  archived    Boolean  @default(false)
   position    Int
   listId      String
   createdAt   DateTime @default(now())
@@ -55,8 +61,34 @@ model Card {
   list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   labels      Label[]
   checklists  Checklist[]
+  activities  Activity[]
+  attachments Attachment[]
 
   @@index([listId, position])
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  cardId    String
+  userId    String
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, createdAt])
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  title     String
+  url       String
+  cardId    String
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, createdAt])
 }
 
 model Label {
