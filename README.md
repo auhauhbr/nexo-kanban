@@ -4,6 +4,21 @@ Nexo é uma aplicação Kanban full stack para organizar projetos em quadros,
 listas e cartões. O sistema possui autenticação, movimentação por arrastar e
 soltar, atualização em tempo real e ambiente completo com Docker.
 
+## Preview
+
+As capturas finais serão adicionadas em `docs/imagens`. O roteiro para produzir
+as imagens está em [`docs/imagens/README.md`](docs/imagens/README.md).
+
+| Visão do quadro | Detalhes do cartão |
+| --- | --- |
+| WIP limit, capas, etiquetas, prazos e checklists | Comentários, atividades, anexos e checklists |
+| `docs/imagens/preview-quadro.png` | `docs/imagens/preview-cartao.png` |
+
+| Central de Arquivados | Cadastro seguro |
+| --- | --- |
+| Consulta e restauração de itens | Confirmação e requisitos de senha |
+| `docs/imagens/preview-arquivados.png` | `docs/imagens/preview-autenticacao.png` |
+
 ## Funcionalidades
 
 - Cadastro, login e sessão autenticada com JWT
@@ -215,6 +230,21 @@ docker compose down
 
 O comando `docker compose down` não apaga os dados armazenados no volume do
 PostgreSQL.
+
+## Publicação
+
+O GitHub Pages hospeda somente o frontend React. A API Node.js, o Socket.io e o
+PostgreSQL precisam ser publicados separadamente antes de ativar o Pages.
+
+Depois de publicar o backend:
+
+1. No GitHub, abra `Settings` → `Secrets and variables` → `Actions` → `Variables`.
+2. Crie `VITE_API_URL` e `VITE_SOCKET_URL` com a URL pública HTTPS do backend.
+3. Em `Settings` → `Pages`, selecione `GitHub Actions` como origem.
+4. Abra `Actions` → `Publicar frontend no GitHub Pages` → `Run workflow`.
+
+O backend também deve permitir a origem `https://auhauhbr.github.io`. O caminho
+final do frontend será `https://auhauhbr.github.io/nexo-kanban/`.
 
 ## Desenvolvimento local
 
