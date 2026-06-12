@@ -374,12 +374,3 @@ kanban-projeto/
 ├── .github/workflows/
 └── docker-compose.yml
 ```
-
-## Convenção de nomes
-
-Pastas, arquivos, funções, variáveis e mensagens próprias do projeto são
-escritos em português sempre que isso mantém o código claro.
-
-Contratos externos permanecem no formato esperado pelas ferramentas e
-integrações, incluindo rotas como `/boards`, campos do Prisma como `boardId` e
-métodos de bibliotecas como `$transaction`.
