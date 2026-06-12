@@ -6,18 +6,32 @@ soltar, atualização em tempo real e ambiente completo com Docker.
 
 ## Preview
 
-As capturas finais serão adicionadas em `docs/imagens`. O roteiro para produzir
-as imagens está em [`docs/imagens/README.md`](docs/imagens/README.md).
+### Autenticação
 
-| Visão do quadro | Detalhes do cartão |
-| --- | --- |
-| WIP limit, capas, etiquetas, prazos e checklists | Comentários, atividades, anexos e checklists |
-| `docs/imagens/preview-quadro.png` | `docs/imagens/preview-cartao.png` |
+Login e cadastro integrados à identidade visual do Nexo. O cadastro apresenta
+confirmação, requisitos e medidor progressivo de força da senha.
 
-| Central de Arquivados | Cadastro seguro |
+| Login | Cadastro seguro |
 | --- | --- |
-| Consulta e restauração de itens | Confirmação e requisitos de senha |
-| `docs/imagens/preview-arquivados.png` | `docs/imagens/preview-autenticacao.png` |
+| ![Tela de login](docs/imagens/preview-login.png) | ![Tela de cadastro](docs/imagens/preview-cadastro.png) |
+
+### Detalhes do cartão
+
+Edição de título, descrição, prazo e capa, com comentários e anexos por link.
+
+![Detalhes do cartão](docs/imagens/preview-cartao.png)
+
+### Recursos e histórico
+
+Etiquetas, checklists com progresso e histórico automático de atividades.
+
+![Recursos e histórico do cartão](docs/imagens/preview-recursos-cartao.png)
+
+### Central de Arquivados
+
+Consulta e restauração de cartões e listas arquivados.
+
+![Central de Arquivados](docs/imagens/preview-arquivados.png)
 
 ## Funcionalidades
 
@@ -164,8 +178,9 @@ backend ou da infraestrutura Docker.
 
 - Senhas são validadas no frontend e backend e armazenadas somente após hash
   com bcrypt.
-- O cadastro exige no mínimo 10 caracteres, uma letra, um número e confirmação
-  visual da senha.
+- O cadastro exige confirmação da senha e mostra uma barra de força progressiva.
+- A senha precisa ter 12 caracteres, maiúscula, minúscula, número, caractere
+  especial e não pode repetir o mesmo caractere quatro vezes seguidas.
 - Login e cadastro possuem limitação de tentativas por endereço IP.
 - A API limita o tamanho de corpos JSON e envia cabeçalhos HTTP de segurança.
 - Tokens JWT expiram após sete dias e rotas privadas verificam o usuário
