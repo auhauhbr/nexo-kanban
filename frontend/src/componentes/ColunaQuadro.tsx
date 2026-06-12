@@ -1,4 +1,5 @@
 import type { DragEvent } from "react";
+import { GripVertical } from "lucide-react";
 
 import type { Cartao, Lista } from "../tipos";
 import { FormularioNovoCartao } from "./FormularioNovoCartao";
@@ -23,6 +24,10 @@ interface PropriedadesColunaQuadro {
   erroLista: string;
   aoRenomearLista: (idLista: string, titulo: string) => Promise<unknown>;
   aoExcluirLista: (idLista: string) => Promise<unknown>;
+  aoIniciarArrasteLista: (idLista: string) => void;
+  aoFinalizarArrasteLista: () => void;
+  aoSoltarLista: (posicao: number) => void;
+  idListaArrastada: string | null;
 }
 
 export function ColunaQuadro({
@@ -39,7 +44,11 @@ export function ColunaQuadro({
   excluindoLista,
   erroLista,
   aoRenomearLista,
-  aoExcluirLista
+  aoExcluirLista,
+  aoIniciarArrasteLista,
+  aoFinalizarArrasteLista,
+  aoSoltarLista,
+  idListaArrastada
 }: PropriedadesColunaQuadro) {
   const permitirSoltar = (evento: DragEvent) => evento.preventDefault();
 
@@ -47,14 +56,36 @@ export function ColunaQuadro({
     <section
       className={`coluna-quadro ${
         idCartaoArrastado ? "coluna-alvo-arraste" : ""
+      } ${idListaArrastada === lista.id ? "lista-arrastando" : ""} ${
+        idListaArrastada && idListaArrastada !== lista.id
+          ? "lista-alvo-arraste"
+          : ""
       }`}
       onDragOver={permitirSoltar}
       onDrop={(evento) => {
         evento.preventDefault();
-        aoSoltarCartao(lista.id, lista.cards.length);
+        if (idListaArrastada) {
+          aoSoltarLista(lista.position);
+        } else {
+          aoSoltarCartao(lista.id, lista.cards.length);
+        }
       }}
     >
       <header>
+        <button
+          aria-label={`Arrastar lista ${lista.title}`}
+          className="alca-lista"
+          draggable
+          onDragEnd={aoFinalizarArrasteLista}
+          onDragStart={(evento) => {
+            evento.dataTransfer.effectAllowed = "move";
+            evento.dataTransfer.setData("text/plain", lista.id);
+            aoIniciarArrasteLista(lista.id);
+          }}
+          type="button"
+        >
+          <GripVertical size={15} />
+        </button>
         <div>
           <h2>{lista.title}</h2>
           <span>{lista.cards.length}</span>
@@ -79,7 +110,7 @@ export function ColunaQuadro({
               className={`cartao-tarefa ${
                 idCartaoArrastado === cartao.id ? "cartao-arrastando" : ""
               }`}
-              draggable
+              draggable={!idListaArrastada}
               key={cartao.id}
               onDragEnd={aoFinalizarArraste}
               onDragOver={permitirSoltar}
@@ -91,7 +122,11 @@ export function ColunaQuadro({
               onDrop={(evento) => {
                 evento.preventDefault();
                 evento.stopPropagation();
-                aoSoltarCartao(lista.id, cartao.position);
+                if (idListaArrastada) {
+                  aoSoltarLista(lista.position);
+                } else {
+                  aoSoltarCartao(lista.id, cartao.position);
+                }
               }}
               onClick={() => aoSelecionarCartao(cartao, lista.title)}
               type="button"

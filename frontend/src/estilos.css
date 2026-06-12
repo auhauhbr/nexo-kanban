@@ -855,6 +855,16 @@ a {
   background: rgba(244, 248, 255, 0.96);
 }
 
+.coluna-quadro.lista-alvo-arraste {
+  border-color: #82a7ec;
+  box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+}
+
+.coluna-quadro.lista-arrastando {
+  opacity: 0.46;
+  transform: rotate(0.6deg);
+}
+
 .coluna-quadro > header {
   display: flex;
   align-items: center;
@@ -862,7 +872,31 @@ a {
   padding: 4px 3px 12px;
 }
 
+.alca-lista {
+  display: grid;
+  width: 23px;
+  height: 28px;
+  flex: 0 0 23px;
+  margin-left: -3px;
+  border: 0;
+  border-radius: 6px;
+  place-items: center;
+  color: #9aa5b5;
+  background: transparent;
+  cursor: grab;
+}
+
+.alca-lista:hover {
+  color: #59687f;
+  background: #e8edf4;
+}
+
+.alca-lista:active {
+  cursor: grabbing;
+}
+
 .coluna-quadro > header div {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
