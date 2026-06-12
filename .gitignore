@@ -2,6 +2,7 @@ node_modules/
 .npm-cache/
 dist/
 coverage/
+backend/src/generated/prisma/
 
 .env
 .env.*

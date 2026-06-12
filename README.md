@@ -40,6 +40,18 @@ Quando o Docker Desktop estiver instalado, inicie o banco:
 docker compose up -d
 ```
 
+Crie e aplique uma migration:
+
+```bash
+npm run db:migrate --workspace backend -- --name nome_da_migration
+```
+
+Abra o Prisma Studio para visualizar os dados:
+
+```bash
+npm run db:studio --workspace backend
+```
+
 ## Endpoints atuais
 
-- `GET /health`: confirma que a API esta online
+- `GET /health`: confirma que a API e o PostgreSQL estao online
