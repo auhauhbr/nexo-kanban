@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Columns3 } from "lucide-react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import * as apiCartoes from "../api/cartoes";
@@ -9,11 +10,17 @@ import * as apiQuadros from "../api/quadros";
 import { ColunaQuadro } from "../componentes/ColunaQuadro";
 import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
+import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
+import type { Cartao } from "../tipos";
 
 export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
   const clienteConsultas = useQueryClient();
   const chaveConsultaQuadro = ["quadro", idQuadro];
+  const [cartaoSelecionado, definirCartaoSelecionado] = useState<{
+    cartao: Cartao;
+    nomeLista: string;
+  } | null>(null);
   const consultaQuadro = useQuery({
     queryKey: chaveConsultaQuadro,
     queryFn: () => apiQuadros.buscarQuadro(idQuadro),
@@ -29,6 +36,11 @@ export function PaginaQuadro() {
     onSuccess: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
+  const edicaoCartao = useMutation({
+    mutationFn: apiCartoes.atualizarCartao,
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
   const mensagemErroCriacao = criacaoLista.error
     ? axios.isAxiosError(criacaoLista.error)
       ? (criacaoLista.error.response?.data?.message ??
@@ -40,6 +52,12 @@ export function PaginaQuadro() {
       ? (criacaoCartao.error.response?.data?.message ??
         "Não foi possível criar o cartão.")
       : "Não foi possível criar o cartão."
+    : "";
+  const mensagemErroEdicao = edicaoCartao.error
+    ? axios.isAxiosError(edicaoCartao.error)
+      ? (edicaoCartao.error.response?.data?.message ??
+        "Não foi possível salvar o cartão.")
+      : "Não foi possível salvar o cartão."
     : "";
 
   if (consultaQuadro.isPending) {
@@ -88,6 +106,9 @@ export function PaginaQuadro() {
             aoCriarCartao={(idLista, titulo, descricao) =>
               criacaoCartao.mutateAsync({ idLista, titulo, descricao })
             }
+            aoSelecionarCartao={(cartao, nomeLista) =>
+              definirCartaoSelecionado({ cartao, nomeLista })
+            }
             criandoCartao={
               criacaoCartao.isPending &&
               criacaoCartao.variables?.idLista === lista.id
@@ -107,6 +128,23 @@ export function PaginaQuadro() {
           erro={mensagemErroCriacao}
         />
       </section>
+
+      {cartaoSelecionado ? (
+        <ModalEditarCartao
+          aoFechar={() => definirCartaoSelecionado(null)}
+          aoSalvar={(titulo, descricao) =>
+            edicaoCartao.mutateAsync({
+              idCartao: cartaoSelecionado.cartao.id,
+              titulo,
+              descricao
+            })
+          }
+          cartao={cartaoSelecionado.cartao}
+          erro={mensagemErroEdicao}
+          nomeLista={cartaoSelecionado.nomeLista}
+          salvando={edicaoCartao.isPending}
+        />
+      ) : null}
     </main>
   );
 }

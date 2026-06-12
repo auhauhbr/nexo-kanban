@@ -1,4 +1,4 @@
-import type { Lista } from "../tipos";
+import type { Cartao, Lista } from "../tipos";
 import { FormularioNovoCartao } from "./FormularioNovoCartao";
 
 interface PropriedadesColunaQuadro {
@@ -10,13 +10,15 @@ interface PropriedadesColunaQuadro {
     titulo: string,
     descricao?: string
   ) => Promise<unknown>;
+  aoSelecionarCartao: (cartao: Cartao, nomeLista: string) => void;
 }
 
 export function ColunaQuadro({
   lista,
   criandoCartao,
   erroCriacaoCartao,
-  aoCriarCartao
+  aoCriarCartao,
+  aoSelecionarCartao
 }: PropriedadesColunaQuadro) {
   return (
     <section className="coluna-quadro">
@@ -32,10 +34,15 @@ export function ColunaQuadro({
           <p className="lista-sem-cartoes">Nenhum cartão nesta lista.</p>
         ) : (
           lista.cards.map((cartao) => (
-            <article className="cartao-tarefa" key={cartao.id}>
+            <button
+              className="cartao-tarefa"
+              key={cartao.id}
+              onClick={() => aoSelecionarCartao(cartao, lista.title)}
+              type="button"
+            >
               <h3>{cartao.title}</h3>
               {cartao.description ? <p>{cartao.description}</p> : null}
-            </article>
+            </button>
           ))
         )}
       </div>
