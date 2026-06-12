@@ -1,4 +1,5 @@
 import { Columns3 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import type { ResumoQuadro } from "../tipos";
 
@@ -17,7 +18,7 @@ export function CartaoQuadro({ quadro }: PropriedadesCartaoQuadro) {
   const quantidadeListas = quadro._count?.lists ?? 0;
 
   return (
-    <article className="cartao-quadro">
+    <Link className="cartao-quadro" to={`/quadros/${quadro.id}`}>
       <div className="icone-cartao-quadro">
         <Columns3 size={22} />
       </div>
@@ -30,6 +31,6 @@ export function CartaoQuadro({ quadro }: PropriedadesCartaoQuadro) {
       <div className="rodape-cartao-quadro">
         <span>Atualizado em {formatarData(quadro.updatedAt)}</span>
       </div>
-    </article>
+    </Link>
   );
 }
