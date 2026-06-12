@@ -18,24 +18,84 @@ soltar, atualização em tempo real e ambiente completo com Docker.
 
 ## Tecnologias
 
-**Frontend**
+### Frontend
 
-- React, TypeScript e Vite
-- TanStack Query
-- Axios e Socket.io Client
-- React Router e Lucide React
+O frontend é uma aplicação React criada com Vite. Ele é responsável pelas
+telas de autenticação, painel de quadros e área Kanban, além das interações de
+criação, edição, exclusão e arrastar e soltar.
 
-**Backend**
+- **React:** estrutura a interface em páginas, contextos e componentes
+  reutilizáveis.
+- **TypeScript:** tipa componentes, propriedades, respostas da API, quadros,
+  listas, cartões e funções de movimentação.
+- **Vite:** executa o ambiente de desenvolvimento e gera o build de produção.
+- **TanStack Query:** busca dados da API, gerencia cache, refaz consultas e
+  permite atualizações otimistas durante movimentações.
+- **Axios:** centraliza as requisições HTTP e adiciona o token JWT às rotas
+  protegidas.
+- **React Router:** controla as páginas públicas e protegidas.
+- **Socket.io Client:** recebe atualizações do quadro sem recarregar a página.
+- **Lucide React:** fornece os ícones da interface.
 
-- Node.js, Express e TypeScript
-- Prisma ORM e PostgreSQL
-- Socket.io, JWT, bcryptjs e Zod
+### Backend
 
-**Infraestrutura e qualidade**
+O backend concentra as regras de negócio e expõe uma API REST. Ele verifica a
+identidade do usuário, protege o acesso aos dados e mantém as posições de
+listas e cartões consistentes durante as movimentações.
 
-- Docker Compose e Nginx
-- Node Test Runner
-- GitHub Actions
+- **Node.js:** ambiente de execução da API.
+- **Express:** organiza rotas, controladores e intermediários HTTP.
+- **TypeScript:** tipa entradas, serviços, respostas, autenticação e integração
+  com o Prisma.
+- **Zod:** valida os dados recebidos antes de executar as regras de negócio.
+- **JWT:** autentica requisições e conexões em tempo real.
+- **bcryptjs:** protege as senhas antes de armazená-las.
+- **Socket.io:** publica alterações somente para os clientes autorizados na
+  sala de cada quadro.
+
+### Banco de dados
+
+- **PostgreSQL:** armazena usuários, quadros, listas e cartões em um modelo
+  relacional.
+- **Prisma ORM:** define o modelo de dados, gera o cliente tipado, executa
+  consultas e controla as migrações do banco.
+- **Transações:** preservam a ordenação de listas e cartões durante alterações
+  que atualizam vários registros.
+
+### Docker e execução
+
+- **Docker Compose:** inicia PostgreSQL, backend e frontend como serviços
+  separados e conectados.
+- **Dockerfile do backend:** gera o cliente Prisma, compila o TypeScript, aplica
+  migrações pendentes e inicia a API.
+- **Dockerfile do frontend:** gera o build de produção da aplicação React.
+- **Nginx:** serve os arquivos do frontend e mantém as rotas do React
+  disponíveis ao atualizar a página.
+- **Volumes:** preservam os dados do PostgreSQL mesmo após encerrar os
+  contêineres.
+
+### Testes e qualidade
+
+- **Node Test Runner:** executa os testes automatizados.
+- **Testes de integração:** validam autenticação, autorização, CRUD, ordenação e
+  eventos em tempo real usando o banco.
+- **Testes do frontend:** validam as regras de movimentação de listas e cartões.
+- **GitHub Actions:** cria um PostgreSQL temporário e executa migrações, testes,
+  verificação de tipos e build a cada envio ao GitHub.
+
+## Desenvolvimento e assistência de IA
+
+O projeto foi desenvolvido como um estudo prático de arquitetura full stack,
+com foco na construção do backend em TypeScript, regras de negócio,
+autenticação, banco PostgreSQL, integração em tempo real, testes e
+containerização com Docker.
+
+Ferramentas de inteligência artificial foram utilizadas como apoio no
+refinamento do frontend, principalmente em decisões de apresentação visual,
+responsividade, organização de componentes e melhorias de experiência do
+usuário. A assistência foi aplicada sobre a estrutura funcional do sistema e
+não substitui a implementação da API, da modelagem do banco, das regras do
+backend ou da infraestrutura Docker.
 
 ## Arquitetura
 
