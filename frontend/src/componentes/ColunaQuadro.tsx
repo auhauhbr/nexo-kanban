@@ -32,6 +32,7 @@ interface PropriedadesColunaQuadro {
   aoRenomearLista: (idLista: string, titulo: string) => Promise<unknown>;
   aoExcluirLista: (idLista: string) => Promise<unknown>;
   aoArquivarLista: (idLista: string) => Promise<unknown>;
+  aoDefinirLimiteLista: (idLista: string, limite: number | null) => Promise<unknown>;
   aoIniciarArrasteLista: (idLista: string) => void;
   aoFinalizarArrasteLista: () => void;
   aoSoltarLista: (posicao: number) => void;
@@ -54,6 +55,7 @@ export function ColunaQuadro({
   aoRenomearLista,
   aoExcluirLista,
   aoArquivarLista,
+  aoDefinirLimiteLista,
   aoIniciarArrasteLista,
   aoFinalizarArrasteLista,
   aoSoltarLista,
@@ -79,7 +81,7 @@ export function ColunaQuadro({
         idListaArrastada && idListaArrastada !== lista.id
           ? "lista-alvo-arraste"
           : ""
-      }`}
+      } ${lista.wipLimit !== null && lista.cards.length > lista.wipLimit ? "lista-acima-limite" : ""}`}
       onDragOver={permitirSoltar}
       onDrop={(evento) => {
         evento.preventDefault();
@@ -105,17 +107,22 @@ export function ColunaQuadro({
         >
           <GripVertical size={15} />
         </button>
-        <div>
+        <div className="cabecalho-titulo-lista">
           <h2>{lista.title}</h2>
-          <span>{lista.cards.length}</span>
+          <span>
+            {lista.cards.length}
+            {lista.wipLimit !== null ? `/${lista.wipLimit}` : ""}
+          </span>
         </div>
         <MenuLista
           aoArquivar={() => aoArquivarLista(lista.id)}
           aoExcluir={() => aoExcluirLista(lista.id)}
+          aoDefinirLimite={(limite) => aoDefinirLimiteLista(lista.id, limite)}
           aoSalvar={(titulo) => aoRenomearLista(lista.id, titulo)}
           erro={erroLista}
           excluindo={excluindoLista}
           quantidadeCartoes={lista.cards.length}
+          limite={lista.wipLimit}
           salvando={salvandoLista}
           titulo={lista.title}
         />

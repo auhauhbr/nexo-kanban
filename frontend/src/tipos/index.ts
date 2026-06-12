@@ -95,7 +95,22 @@ export interface Lista {
   createdAt: string;
   updatedAt: string;
   archived: boolean;
+  wipLimit: number | null;
   cards: Cartao[];
+}
+
+export interface ListaArquivada extends Omit<Lista, "cards"> {
+  _count: { cards: number };
+}
+
+export interface CartaoArquivado
+  extends Omit<Cartao, "labels" | "checklists" | "activities" | "attachments"> {
+  list: { id: string; title: string; archived: boolean };
+}
+
+export interface ArquivadosQuadro {
+  lists: ListaArquivada[];
+  cards: CartaoArquivado[];
 }
 
 export interface Quadro extends Omit<ResumoQuadro, "_count"> {

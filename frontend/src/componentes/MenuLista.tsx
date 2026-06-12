@@ -1,36 +1,42 @@
-import { Archive, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
+import { Archive, Gauge, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 interface PropriedadesMenuLista {
   titulo: string;
   quantidadeCartoes: number;
+  limite: number | null;
   salvando: boolean;
   excluindo: boolean;
   erro: string;
   aoSalvar: (titulo: string) => Promise<unknown>;
   aoExcluir: () => Promise<unknown>;
   aoArquivar: () => Promise<unknown>;
+  aoDefinirLimite: (limite: number | null) => Promise<unknown>;
 }
 
 export function MenuLista({
   titulo,
   quantidadeCartoes,
+  limite,
   salvando,
   excluindo,
   erro,
   aoSalvar,
   aoExcluir,
-  aoArquivar
+  aoArquivar,
+  aoDefinirLimite
 }: PropriedadesMenuLista) {
   const [aberto, definirAberto] = useState(false);
-  const [modo, definirModo] = useState<"menu" | "editar" | "excluir">("menu");
+  const [modo, definirModo] = useState<"menu" | "editar" | "limite" | "excluir">("menu");
   const [novoTitulo, definirNovoTitulo] = useState(titulo);
+  const [novoLimite, definirNovoLimite] = useState(limite?.toString() ?? "");
   const ocupado = salvando || excluindo;
 
   const fechar = () => {
     definirAberto(false);
     definirModo("menu");
     definirNovoTitulo(titulo);
+    definirNovoLimite(limite?.toString() ?? "");
   };
 
   const salvar = async (evento: FormEvent) => {
@@ -78,6 +84,8 @@ export function MenuLista({
             ? "Renomear lista"
             : modo === "excluir"
               ? "Excluir lista"
+              : modo === "limite"
+                ? "Limite de cartões"
               : "Opções da lista"}
         </strong>
         <button aria-label="Fechar menu" disabled={ocupado} onClick={fechar}>
@@ -90,6 +98,13 @@ export function MenuLista({
           <button onClick={() => definirModo("editar")} type="button">
             <Pencil size={14} />
             Renomear lista
+          </button>
+          <button
+            onClick={() => definirModo("limite")}
+            type="button"
+          >
+            <Gauge size={14} />
+            Definir limite de cartões
           </button>
           <button
             disabled={ocupado}
@@ -119,6 +134,32 @@ export function MenuLista({
           />
           <button disabled={ocupado || !novoTitulo.trim()} type="submit">
             {salvando ? "Salvando..." : "Salvar nome"}
+          </button>
+        </form>
+      ) : null}
+
+      {modo === "limite" ? (
+        <form
+          className="edicao-lista"
+          onSubmit={async (evento) => {
+            evento.preventDefault();
+            await aoDefinirLimite(novoLimite ? Number(novoLimite) : null);
+            fechar();
+          }}
+        >
+          <p className="texto-limite-lista">
+            O limite alerta sobre excesso de trabalho, mas não impede movimentações.
+          </p>
+          <input
+            autoFocus
+            min="1"
+            onChange={(evento) => definirNovoLimite(evento.target.value)}
+            placeholder="Sem limite"
+            type="number"
+            value={novoLimite}
+          />
+          <button disabled={ocupado} type="submit">
+            {novoLimite ? "Salvar limite" : "Remover limite"}
           </button>
         </form>
       ) : null}

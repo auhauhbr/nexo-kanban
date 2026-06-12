@@ -29,6 +29,7 @@ const criarLista = (id: string, position: number, cards: Cartao[]): Lista => ({
   boardId: "quadro-1",
   position,
   archived: false,
+  wipLimit: null,
   cards,
   createdAt: "2026-06-12T00:00:00.000Z",
   updatedAt: "2026-06-12T00:00:00.000Z"

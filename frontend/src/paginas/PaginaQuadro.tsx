@@ -1,5 +1,5 @@
 ﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Columns3, Wifi } from "lucide-react";
+import { Archive, ArrowLeft, Columns3, Wifi } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -13,6 +13,7 @@ import { ColunaQuadro } from "../componentes/ColunaQuadro";
 import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
 import { MenuQuadro } from "../componentes/MenuQuadro";
+import { ModalArquivados } from "../componentes/ModalArquivados";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
 import { usarNotificacoes } from "../contexto/ContextoNotificacoes";
 import { usarTempoRealQuadro } from "../hooks/usarTempoRealQuadro";
@@ -51,10 +52,16 @@ export function PaginaQuadro() {
   const [idListaArrastada, definirIdListaArrastada] = useState<string | null>(
     null
   );
+  const [arquivadosAbertos, definirArquivadosAbertos] = useState(false);
   const consultaQuadro = useQuery({
     queryKey: chaveConsultaQuadro,
     queryFn: () => apiQuadros.buscarQuadro(idQuadro),
     enabled: Boolean(idQuadro)
+  });
+  const consultaArquivados = useQuery({
+    queryKey: ["arquivados", idQuadro],
+    queryFn: () => apiQuadros.buscarArquivados(idQuadro),
+    enabled: Boolean(idQuadro && arquivadosAbertos)
   });
   const edicaoQuadro = useMutation({
     mutationFn: apiQuadros.atualizarTituloQuadro,
@@ -99,6 +106,23 @@ export function PaginaQuadro() {
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
       mostrarSucesso("Lista arquivada.");
     }
+  });
+  const limiteLista = useMutation({
+    mutationFn: apiListas.definirLimiteLista,
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Limite da lista atualizado.");
+    }
+  });
+  const restauracaoArquivados = useMutation({
+    mutationFn: async (acao: () => Promise<unknown>) => acao(),
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      clienteConsultas.invalidateQueries({ queryKey: ["arquivados", idQuadro] });
+      mostrarSucesso("Item restaurado.");
+    },
+    onError: (erro) =>
+      mostrarErro(obterMensagemErro(erro, "Não foi possível restaurar o item."))
   });
   const movimentacaoLista = useMutation({
     mutationFn: ({ idLista, posicaoDestino }: MovimentoLista) =>
@@ -205,9 +229,9 @@ export function PaginaQuadro() {
         )
       : "";
   const mensagemErroLista =
-    edicaoLista.error || exclusaoLista.error || arquivamentoLista.error
+    edicaoLista.error || exclusaoLista.error || arquivamentoLista.error || limiteLista.error
       ? obterMensagemErro(
-          edicaoLista.error ?? exclusaoLista.error ?? arquivamentoLista.error,
+          edicaoLista.error ?? exclusaoLista.error ?? arquivamentoLista.error ?? limiteLista.error,
           "Não foi possível atualizar a lista."
         )
       : "";
@@ -297,6 +321,14 @@ export function PaginaQuadro() {
             </p>
           </div>
           <div className="acoes-quadro">
+            <button
+              className="botao-arquivados-quadro"
+              onClick={() => definirArquivadosAbertos(true)}
+              type="button"
+            >
+              <Archive size={14} />
+              Arquivados
+            </button>
             <span
               className={`estado-tempo-real estado-tempo-real-${estadoTempoReal}`}
               title={`Tempo real: ${estadoTempoReal}`}
@@ -334,6 +366,9 @@ export function PaginaQuadro() {
             aoIniciarArrasteLista={definirIdListaArrastada}
             aoExcluirLista={(idLista) => exclusaoLista.mutateAsync(idLista)}
             aoArquivarLista={(idLista) => arquivamentoLista.mutateAsync(idLista)}
+            aoDefinirLimiteLista={(idLista, limite) =>
+              limiteLista.mutateAsync({ idLista, limite })
+            }
             aoRenomearLista={(idLista, titulo) =>
               edicaoLista.mutateAsync({ idLista, titulo })
             }
@@ -352,6 +387,7 @@ export function PaginaQuadro() {
               edicaoLista.variables?.idLista === lista.id ||
               exclusaoLista.variables === lista.id
               || arquivamentoLista.variables === lista.id
+              || limiteLista.variables?.idLista === lista.id
                 ? mensagemErroLista
                 : ""
             }
@@ -473,6 +509,23 @@ export function PaginaQuadro() {
           excluindo={exclusaoCartao.isPending}
           nomeLista={cartaoSelecionado.nomeLista}
           salvando={edicaoCartao.isPending || recursosCartao.isPending}
+        />
+      ) : null}
+
+      {arquivadosAbertos && consultaArquivados.data ? (
+        <ModalArquivados
+          aoFechar={() => definirArquivadosAbertos(false)}
+          aoRestaurarCartao={(idCartao, idLista) =>
+            restauracaoArquivados.mutateAsync(() =>
+              apiCartoes.restaurarCartao({ idCartao, idLista })
+            )
+          }
+          aoRestaurarLista={(idLista) =>
+            restauracaoArquivados.mutateAsync(() => apiListas.restaurarLista(idLista))
+          }
+          arquivados={consultaArquivados.data}
+          listasAtivas={quadro.lists}
+          ocupado={restauracaoArquivados.isPending}
         />
       ) : null}
     </main>

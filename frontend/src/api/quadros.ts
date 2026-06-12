@@ -1,5 +1,5 @@
 import { api } from "./cliente";
-import type { Quadro, ResumoQuadro } from "../tipos";
+import type { ArquivadosQuadro, Quadro, ResumoQuadro } from "../tipos";
 
 export const listarQuadros = async () => {
   const { data: resposta } = await api.get<{ boards: ResumoQuadro[] }>("/boards");
@@ -36,4 +36,11 @@ export const atualizarTituloQuadro = async ({
 
 export const excluirQuadro = async (idQuadro: string) => {
   await api.delete(`/boards/${idQuadro}`);
+};
+
+export const buscarArquivados = async (idQuadro: string) => {
+  const { data } = await api.get<{ archived: ArquivadosQuadro }>(
+    `/boards/${idQuadro}/archived`
+  );
+  return data.archived;
 };

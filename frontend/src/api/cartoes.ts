@@ -80,3 +80,16 @@ export const atualizarRecursosCartao = async ({
   });
   return data.card;
 };
+
+export const restaurarCartao = async ({
+  idCartao,
+  idLista
+}: {
+  idCartao: string;
+  idLista?: string;
+}) => {
+  const { data } = await api.patch<{ card: Cartao }>(`/cards/${idCartao}/restaurar`, {
+    listId: idLista
+  });
+  return data.card;
+};

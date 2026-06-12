@@ -53,3 +53,21 @@ export const arquivarLista = async (idLista: string) => {
   });
   return data.list;
 };
+
+export const definirLimiteLista = async ({
+  idLista,
+  limite
+}: {
+  idLista: string;
+  limite: number | null;
+}) => {
+  const { data } = await api.patch<{ list: Lista }>(`/lists/${idLista}`, {
+    wipLimit: limite
+  });
+  return data.list;
+};
+
+export const restaurarLista = async (idLista: string) => {
+  const { data } = await api.patch<{ list: Lista }>(`/lists/${idLista}/restaurar`);
+  return data.list;
+};
