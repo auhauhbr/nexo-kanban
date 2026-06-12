@@ -2,10 +2,12 @@ import { Router } from "express";
 
 import { prisma } from "../config/prisma.js";
 import { authRoutes } from "../modules/auth/auth.routes.js";
+import { boardsRoutes } from "../modules/boards/boards.routes.js";
 
 export const routes = Router();
 
 routes.use("/auth", authRoutes);
+routes.use("/boards", boardsRoutes);
 
 routes.get("/health", async (_request, response) => {
   try {

@@ -58,3 +58,8 @@ npm run db:studio --workspace backend
 - `POST /auth/register`: cria uma conta e retorna um JWT
 - `POST /auth/login`: autentica uma conta e retorna um JWT
 - `GET /auth/me`: retorna o usuario autenticado
+- `GET /boards`: lista os quadros do usuario
+- `POST /boards`: cria um quadro
+- `GET /boards/:id`: retorna um quadro com listas e cartoes
+- `PATCH /boards/:id`: atualiza um quadro
+- `DELETE /boards/:id`: remove um quadro
