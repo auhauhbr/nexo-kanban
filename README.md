@@ -1,39 +1,61 @@
-# Projeto Kanban
+# Nexo
 
-Aplicação full stack de gestão de tarefas com quadros, listas, cartões, arrastar e soltar e atualizações em tempo real.
+Nexo é uma aplicação Kanban full stack para organizar projetos em quadros,
+listas e cartões. O sistema possui autenticação, movimentação por arrastar e
+soltar, atualização em tempo real e ambiente completo com Docker.
 
-## Stack planejada
+## Funcionalidades
 
-- Frontend: React, TypeScript, Vite, TanStack Query e dnd-kit
-- Backend: Node.js, Express, TypeScript, Prisma e Socket.io
-- Banco de dados: PostgreSQL 16
+- Cadastro, login e sessão autenticada com JWT
+- Criação, edição e exclusão de quadros
+- Criação, renomeação, reordenação e exclusão de listas
+- Criação, edição, movimentação e exclusão de cartões
+- Arrastar e soltar cartões entre listas
+- Atualizações em tempo real com salas privadas por quadro
+- Interface responsiva com estados de carregamento, erro e notificações
+- Testes de integração da API e testes das regras de movimentação
+- Validação automática com GitHub Actions
 
-## Requisitos
+## Tecnologias
 
-- Node.js 20 ou superior
-- npm 10 ou superior
-- Docker Desktop para executar o PostgreSQL localmente
+**Frontend**
 
-## Primeiros comandos
+- React, TypeScript e Vite
+- TanStack Query
+- Axios e Socket.io Client
+- React Router e Lucide React
 
-Instale as dependências:
+**Backend**
 
-```bash
-npm install
+- Node.js, Express e TypeScript
+- Prisma ORM e PostgreSQL
+- Socket.io, JWT, bcryptjs e Zod
+
+**Infraestrutura e qualidade**
+
+- Docker Compose e Nginx
+- Node Test Runner
+- GitHub Actions
+
+## Arquitetura
+
+```mermaid
+flowchart LR
+    U[Usuário] --> F[Frontend React + Nginx]
+    F -->|API REST + JWT| B[Backend Express]
+    F <-->|Socket.io| B
+    B --> P[(PostgreSQL)]
 ```
+
+O frontend utiliza a API REST para persistir alterações e o Socket.io para
+receber atualizações do quadro em tempo real. Cada conexão só pode entrar nas
+salas dos quadros pertencentes ao usuário autenticado.
 
 ## Executar com Docker
 
-Para iniciar apenas o PostgreSQL e desenvolver o backend e o frontend pelo
-terminal:
+### Aplicação completa
 
-```bash
-docker compose up -d db
-npm run dev:backend
-npm run dev:frontend
-```
-
-Para construir e iniciar a aplicação completa em contêineres:
+Com o Docker Desktop em execução:
 
 ```bash
 docker compose up -d --build
@@ -41,93 +63,132 @@ docker compose up -d --build
 
 Depois, acesse:
 
-- Frontend: `http://localhost:5173`
+- Aplicação: `http://localhost:5173`
 - API: `http://localhost:3333`
 - Saúde da API: `http://localhost:3333/health`
 
-Ao iniciar o backend em contêiner, as migrações pendentes do Prisma são
-aplicadas automaticamente. Para acompanhar os serviços:
+As migrações pendentes do Prisma são aplicadas automaticamente ao iniciar o
+backend.
+
+Para acompanhar ou encerrar os serviços:
 
 ```bash
 docker compose ps
 docker compose logs -f
-```
-
-Para encerrar os serviços sem apagar os dados:
-
-```bash
 docker compose down
 ```
 
-Crie o arquivo de ambiente do backend:
+O comando `docker compose down` não apaga os dados armazenados no volume do
+PostgreSQL.
+
+## Desenvolvimento local
+
+### Requisitos
+
+- Node.js 20 ou superior
+- npm 10 ou superior
+- Docker Desktop
+
+Instale as dependências e crie o arquivo de ambiente do backend:
+
+```bash
+npm install
+```
 
 ```powershell
 Copy-Item backend/.env.example backend/.env
 ```
 
-Inicie somente o backend:
+Inicie o banco:
+
+```bash
+docker compose up -d db
+```
+
+Em terminais separados, inicie a API e o frontend:
 
 ```bash
 npm run dev:backend
-```
-
-Inicie somente o frontend:
-
-```bash
 npm run dev:frontend
 ```
 
-Quando o Docker Desktop estiver instalado, inicie o banco:
+## Comandos úteis
 
 ```bash
-docker compose up -d
-```
+# Executa testes, verificação de tipos e build
+npm run validar
 
-Crie e aplique uma migration:
+# Executa somente os testes
+npm test
 
-```bash
-npm run db:migrate --workspace backend -- --name nome_da_migration
-```
+# Cria e aplica uma nova migração
+npm run db:migrate --workspace backend -- --name nome_da_migracao
 
-Abra o Prisma Studio para visualizar os dados:
-
-```bash
+# Abre a interface de dados do Prisma
 npm run db:studio --workspace backend
 ```
 
-Execute os testes automatizados:
+## API
 
-```bash
-npm test
+Todas as rotas, exceto cadastro e login, exigem o cabeçalho
+`Authorization: Bearer <token>`.
+
+| Método | Rota | Ação |
+| --- | --- | --- |
+| `POST` | `/auth/register` | Cria uma conta |
+| `POST` | `/auth/login` | Autentica uma conta |
+| `GET` | `/auth/me` | Retorna o usuário autenticado |
+| `GET` | `/boards` | Lista os quadros do usuário |
+| `POST` | `/boards` | Cria um quadro |
+| `GET` | `/boards/:id` | Retorna um quadro com listas e cartões |
+| `PATCH` | `/boards/:id` | Atualiza um quadro |
+| `DELETE` | `/boards/:id` | Exclui um quadro |
+| `POST` | `/boards/:boardId/lists` | Cria uma lista |
+| `PATCH` | `/lists/:id` | Atualiza ou move uma lista |
+| `DELETE` | `/lists/:id` | Exclui uma lista |
+| `POST` | `/lists/:listId/cards` | Cria um cartão |
+| `PATCH` | `/cards/:id` | Atualiza ou move um cartão |
+| `DELETE` | `/cards/:id` | Exclui um cartão |
+| `GET` | `/health` | Verifica a API e o banco |
+
+## Tempo real
+
+A conexão Socket.io exige o JWT em `auth.token`. Após a autenticação, o evento
+`join-board` permite entrar somente na sala de um quadro pertencente ao usuário.
+
+Alterações em quadros, listas e cartões são publicadas aos clientes conectados
+à mesma sala. O frontend invalida o cache correspondente e sincroniza os dados
+sem recarregar a página.
+
+## Estrutura
+
+```text
+kanban-projeto/
+├── backend/
+│   ├── prisma/
+│   └── src/
+│       ├── configuracao/
+│       ├── intermediarios/
+│       ├── modulos/
+│       ├── tempo-real/
+│       └── testes/
+├── frontend/
+│   └── src/
+│       ├── api/
+│       ├── componentes/
+│       ├── contexto/
+│       ├── paginas/
+│       ├── tempo-real/
+│       └── testes/
+├── .github/workflows/
+└── docker-compose.yml
 ```
-
-## Endpoints atuais
-
-- `GET /health`: confirma que a API e o PostgreSQL estão online
-- `POST /auth/register`: cria uma conta e retorna um JWT
-- `POST /auth/login`: autentica uma conta e retorna um JWT
-- `GET /auth/me`: retorna o usuário autenticado
-- `GET /boards`: lista os quadros do usuário
-- `POST /boards`: cria um quadro
-- `GET /boards/:id`: retorna um quadro com listas e cartões
-- `PATCH /boards/:id`: atualiza um quadro
-- `DELETE /boards/:id`: remove um quadro
-- `POST /boards/:boardId/lists`: cria uma lista no final do quadro
-- `PATCH /lists/:id`: atualiza título ou posição de uma lista
-- `DELETE /lists/:id`: remove uma lista
-- `POST /lists/:listId/cards`: cria um cartão no final da lista
-- `PATCH /cards/:id`: atualiza ou move um cartão
-- `DELETE /cards/:id`: remove um cartão
-
-## Eventos em tempo real
-
-- A conexão Socket.io exige o JWT em `auth.token`
-- `join-board`: entra com segurança na sala de um quadro
-- `board:updated`: solicita a sincronização dos dados do quadro
-- Eventos específicos: `board:changed`, `board:deleted`, `list:created`, `list:updated`, `list:deleted`, `card:created`, `card:updated` e `card:deleted`
 
 ## Convenção de nomes
 
-Pastas, arquivos, funções, variáveis e mensagens próprias do projeto são escritos em português sempre que isso deixa o código claro.
+Pastas, arquivos, funções, variáveis e mensagens próprias do projeto são
+escritos em português sempre que isso mantém o código claro.
 
-Contratos externos permanecem no formato esperado pelas ferramentas e integrações. Isso inclui rotas como `/boards`, campos da API e do Prisma como `boardId` e métodos de bibliotecas como `$transaction`.
+Contratos externos permanecem no formato esperado pelas ferramentas e
+integrações, incluindo rotas como `/boards`, campos do Prisma como `boardId` e
+métodos de bibliotecas como `$transaction`.
