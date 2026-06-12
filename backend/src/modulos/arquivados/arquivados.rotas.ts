@@ -8,7 +8,18 @@ import {
 } from "./arquivados.controlador.js";
 
 export const rotasArquivados = Router();
-rotasArquivados.use(intermediarioDeAutenticacao);
-rotasArquivados.get("/boards/:id/archived", controladorListarArquivados);
-rotasArquivados.patch("/lists/:id/restaurar", controladorRestaurarLista);
-rotasArquivados.patch("/cards/:id/restaurar", controladorRestaurarCartao);
+rotasArquivados.get(
+  "/boards/:id/archived",
+  intermediarioDeAutenticacao,
+  controladorListarArquivados
+);
+rotasArquivados.patch(
+  "/lists/:id/restaurar",
+  intermediarioDeAutenticacao,
+  controladorRestaurarLista
+);
+rotasArquivados.patch(
+  "/cards/:id/restaurar",
+  intermediarioDeAutenticacao,
+  controladorRestaurarCartao
+);

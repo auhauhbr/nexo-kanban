@@ -140,6 +140,10 @@ after(async () => {
 });
 
 test("autenticação cadastra, conecta e protege a rota do usuário atual", async () => {
+  const health = await get("/health");
+  assert.equal(health.resposta.status, 200);
+  assert.equal(health.body.status, "ok");
+
   const user = await registerUser("Auth Integration", "auth");
 
   const duplicate = await post("/auth/register", {
