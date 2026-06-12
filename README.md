@@ -63,3 +63,6 @@ npm run db:studio --workspace backend
 - `GET /boards/:id`: retorna um quadro com listas e cartoes
 - `PATCH /boards/:id`: atualiza um quadro
 - `DELETE /boards/:id`: remove um quadro
+- `POST /boards/:boardId/lists`: cria uma lista no final do quadro
+- `PATCH /lists/:id`: atualiza titulo ou posicao de uma lista
+- `DELETE /lists/:id`: remove uma lista
