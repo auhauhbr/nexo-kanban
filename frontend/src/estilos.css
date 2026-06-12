@@ -873,11 +873,29 @@ a {
 }
 
 .cartao-tarefa {
+  width: 100%;
   padding: 13px;
   border: 1px solid #e0e6ee;
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 5px 12px rgba(27, 45, 75, 0.05);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.cartao-tarefa:hover {
+  border-color: #bdc9da;
+  box-shadow: 0 8px 17px rgba(27, 45, 75, 0.1);
+  transform: translateY(-1px);
+}
+
+.cartao-tarefa:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .cartao-tarefa h3 {
@@ -1003,6 +1021,141 @@ a {
   color: #b42318;
   font-size: 9px;
   line-height: 1.5;
+}
+
+.fundo-modal {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  overflow-y: auto;
+  padding: 32px 18px;
+  place-items: center;
+  background: rgba(6, 18, 38, 0.62);
+  backdrop-filter: blur(5px);
+}
+
+.modal-cartao {
+  width: min(100%, 560px);
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(5, 18, 40, 0.3);
+}
+
+.modal-cartao header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.modal-cartao header span {
+  display: block;
+  margin-bottom: 5px;
+  color: #778397;
+  font-size: 10px;
+}
+
+.modal-cartao h2 {
+  margin: 0;
+  color: #172033;
+  font-family: "Manrope", sans-serif;
+  font-size: 24px;
+  letter-spacing: -0.7px;
+}
+
+.modal-cartao header button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  place-items: center;
+  color: #667085;
+  background: #f0f3f7;
+  cursor: pointer;
+}
+
+.modal-cartao label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 19px;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.modal-cartao label > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.modal-cartao input,
+.modal-cartao textarea {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #d4dce7;
+  border-radius: 9px;
+  outline: none;
+  color: #172033;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.modal-cartao textarea {
+  min-height: 145px;
+  resize: vertical;
+}
+
+.modal-cartao input:focus,
+.modal-cartao textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.11);
+}
+
+.erro-modal-cartao {
+  margin: -5px 0 17px;
+  color: #b42318;
+  font-size: 10px;
+}
+
+.modal-cartao footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 19px;
+  border-top: 1px solid #edf0f5;
+}
+
+.modal-cartao footer button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-cartao footer button:first-child {
+  color: #526075;
+  background: #edf1f6;
+}
+
+.modal-cartao footer button:last-child {
+  color: #fff;
+  background: var(--blue);
+}
+
+.modal-cartao button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .botao-adicionar-lista {
@@ -1206,5 +1359,29 @@ a {
   .botao-adicionar-lista {
     width: 274px;
     flex-basis: 274px;
+  }
+
+  .fundo-modal {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .modal-cartao {
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 15px;
+  }
+
+  .modal-cartao h2 {
+    font-size: 21px;
+  }
+
+  .modal-cartao footer {
+    flex-direction: column-reverse;
+  }
+
+  .modal-cartao footer button {
+    width: 100%;
   }
 }
