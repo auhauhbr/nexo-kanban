@@ -1,16 +1,22 @@
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { after, before, test } from "node:test";
 
+import { io as createSocketClient, type Socket } from "socket.io-client";
+
 import { app } from "../app.js";
 import { prisma } from "../config/prisma.js";
+import { createSocketServer } from "../sockets/index.js";
 
 const runId = `${Date.now()}-${process.pid}`;
 const emailPrefix = `integration-${runId}`;
 const password = "password123";
 
 let baseUrl = "";
-let server: ReturnType<typeof app.listen>;
+const clients: Socket[] = [];
+const server = createServer(app);
+const socketServer = createSocketServer(server);
 
 type JsonObject = Record<string, unknown>;
 
@@ -79,14 +85,47 @@ const registerUser = async (name: string, suffix: string) => {
   };
 };
 
+const connectSocket = async (token: string) => {
+  const client = createSocketClient(baseUrl, {
+    auth: { token },
+    transports: ["websocket"]
+  });
+  clients.push(client);
+
+  await new Promise<void>((resolve, reject) => {
+    client.once("connect", resolve);
+    client.once("connect_error", reject);
+  });
+
+  return client;
+};
+
+const joinBoard = (client: Socket, boardId: string) =>
+  new Promise<JsonObject>((resolve) => {
+    client.emit("join-board", { boardId }, resolve);
+  });
+
+const waitForEvent = (client: Socket, event: string) =>
+  new Promise<JsonObject>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(`Timed out waiting for ${event}`));
+    }, 3000);
+
+    client.once(event, (payload) => {
+      clearTimeout(timeout);
+      resolve(payload as JsonObject);
+    });
+  });
+
 before(async () => {
-  server = app.listen(0);
+  server.listen(0);
   await new Promise<void>((resolve) => server.once("listening", resolve));
   const address = server.address() as AddressInfo;
   baseUrl = `http://127.0.0.1:${address.port}`;
 });
 
 after(async () => {
+  clients.forEach((client) => client.disconnect());
   await prisma.user.deleteMany({
     where: {
       email: {
@@ -94,14 +133,8 @@ after(async () => {
       }
     }
   });
-  await new Promise<void>((resolve, reject) => {
-    server.close((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve();
-    });
+  await new Promise<void>((resolve) => {
+    socketServer.close(() => resolve());
   });
   await prisma.$disconnect();
 });
@@ -239,4 +272,55 @@ test("kanban CRUD preserves ownership and ordered positions", async () => {
 
   const afterDelete = await get(`/boards/${boardId}`, owner.token);
   assert.equal(afterDelete.response.status, 404);
+});
+
+test("realtime rooms authenticate owners and publish REST changes", async () => {
+  const owner = await registerUser("Realtime Owner", "realtime-owner");
+  const other = await registerUser("Realtime Other", "realtime-other");
+
+  const createdBoard = await post(
+    "/boards",
+    { title: "Realtime Board" },
+    owner.token
+  );
+  const boardId = (createdBoard.body.board as JsonObject).id as string;
+
+  const ownerSocket = await connectSocket(owner.token);
+  const otherSocket = await connectSocket(other.token);
+
+  const unauthenticatedSocket = createSocketClient(baseUrl, {
+    transports: ["websocket"]
+  });
+  const authenticationError = await new Promise<string>((resolve) => {
+    unauthenticatedSocket.once("connect_error", (error) => {
+      resolve(error.message);
+    });
+  });
+  unauthenticatedSocket.disconnect();
+  assert.equal(authenticationError, "Authentication token is required");
+
+  assert.deepEqual(await joinBoard(ownerSocket, boardId), { ok: true });
+  assert.deepEqual(await joinBoard(otherSocket, boardId), {
+    ok: false,
+    message: "Board not found"
+  });
+
+  let otherReceivedEvent = false;
+  otherSocket.once("list:created", () => {
+    otherReceivedEvent = true;
+  });
+
+  const eventPromise = waitForEvent(ownerSocket, "list:created");
+  const createdList = await post(
+    `/boards/${boardId}/lists`,
+    { title: "Realtime List" },
+    owner.token
+  );
+  assert.equal(createdList.response.status, 201);
+
+  const event = await eventPromise;
+  assert.equal((event.list as JsonObject).title, "Realtime List");
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(otherReceivedEvent, false);
 });

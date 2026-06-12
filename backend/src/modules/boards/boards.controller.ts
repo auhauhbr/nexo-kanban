@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { emitBoardEvent } from "../../sockets/index.js";
 import {
   boardIdParamsSchema,
   createBoardSchema,
@@ -48,6 +49,7 @@ export const updateBoardController: RequestHandler = async (
     id,
     updateBoardSchema.parse(request.body)
   );
+  emitBoardEvent(board.id, "board:changed", { board });
   response.status(200).json({ board });
 };
 
@@ -57,5 +59,6 @@ export const deleteBoardController: RequestHandler = async (
 ) => {
   const { id } = boardIdParamsSchema.parse(request.params);
   await deleteBoard(request.userId, id);
+  emitBoardEvent(id, "board:deleted", { boardId: id });
   response.status(204).send();
 };

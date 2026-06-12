@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { emitBoardEvent } from "../../sockets/index.js";
 import {
   cardIdParamsSchema,
   createCardSchema,
@@ -13,11 +14,12 @@ export const createCardController: RequestHandler = async (
   response
 ) => {
   const { listId } = listIdParamsSchema.parse(request.params);
-  const card = await createCard(
+  const { card, boardId } = await createCard(
     request.userId,
     listId,
     createCardSchema.parse(request.body)
   );
+  emitBoardEvent(boardId, "card:created", { card });
   response.status(201).json({ card });
 };
 
@@ -26,11 +28,12 @@ export const updateCardController: RequestHandler = async (
   response
 ) => {
   const { id } = cardIdParamsSchema.parse(request.params);
-  const card = await updateCard(
+  const { card, boardId } = await updateCard(
     request.userId,
     id,
     updateCardSchema.parse(request.body)
   );
+  emitBoardEvent(boardId, "card:updated", { card });
   response.status(200).json({ card });
 };
 
@@ -39,6 +42,7 @@ export const deleteCardController: RequestHandler = async (
   response
 ) => {
   const { id } = cardIdParamsSchema.parse(request.params);
-  await deleteCard(request.userId, id);
+  const boardId = await deleteCard(request.userId, id);
+  emitBoardEvent(boardId, "card:deleted", { cardId: id });
   response.status(204).send();
 };

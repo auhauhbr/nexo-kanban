@@ -73,7 +73,10 @@ export const createCard = async (
       data: { updatedAt: new Date() }
     });
 
-    return card;
+    return {
+      card,
+      boardId: list.boardId
+    };
   });
 };
 
@@ -187,7 +190,10 @@ export const updateCard = async (
       data: { updatedAt: new Date() }
     });
 
-    return updatedCard;
+    return {
+      card: updatedCard,
+      boardId: card.list.boardId
+    };
   });
 };
 
@@ -218,4 +224,6 @@ export const deleteCard = async (ownerId: string, cardId: string) => {
       data: { updatedAt: new Date() }
     });
   });
+
+  return card.list.boardId;
 };

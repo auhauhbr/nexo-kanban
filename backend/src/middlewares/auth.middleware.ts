@@ -1,12 +1,6 @@
 import type { RequestHandler } from "express";
-import jwt from "jsonwebtoken";
-import { z } from "zod";
 
-import { env } from "../config/env.js";
-
-const tokenPayloadSchema = z.object({
-  sub: z.string().uuid()
-});
+import { verifyAuthToken } from "../utils/auth-token.js";
 
 export const authMiddleware: RequestHandler = (request, response, next) => {
   const authorization = request.headers.authorization;
@@ -21,8 +15,7 @@ export const authMiddleware: RequestHandler = (request, response, next) => {
   const token = authorization.slice("Bearer ".length);
 
   try {
-    const payload = tokenPayloadSchema.parse(jwt.verify(token, env.JWT_SECRET));
-    request.userId = payload.sub;
+    request.userId = verifyAuthToken(token);
     next();
   } catch {
     response.status(401).json({

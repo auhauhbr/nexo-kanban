@@ -166,4 +166,6 @@ export const deleteList = async (ownerId: string, listId: string) => {
       data: { updatedAt: new Date() }
     });
   });
+
+  return list.boardId;
 };

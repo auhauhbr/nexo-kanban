@@ -75,3 +75,10 @@ npm test
 - `POST /lists/:listId/cards`: cria um cartao no final da lista
 - `PATCH /cards/:id`: atualiza ou move um cartao
 - `DELETE /cards/:id`: remove um cartao
+
+## Eventos em tempo real
+
+- A conexao Socket.io exige o JWT em `auth.token`
+- `join-board`: entra com seguranca na sala de um quadro
+- `board:updated`: solicita a sincronizacao dos dados do quadro
+- Eventos especificos: `board:changed`, `board:deleted`, `list:created`, `list:updated`, `list:deleted`, `card:created`, `card:updated` e `card:deleted`
