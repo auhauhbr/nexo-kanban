@@ -32,3 +32,17 @@ export const atualizarTituloLista = async ({
 export const excluirLista = async (idLista: string) => {
   await api.delete(`/lists/${idLista}`);
 };
+
+export const moverLista = async ({
+  idLista,
+  posicao
+}: {
+  idLista: string;
+  posicao: number;
+}) => {
+  const { data: resposta } = await api.patch<{ list: Lista }>(
+    `/lists/${idLista}`,
+    { position: posicao }
+  );
+  return resposta.list;
+};
