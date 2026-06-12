@@ -22,6 +22,43 @@ Instale as dependências:
 npm install
 ```
 
+## Executar com Docker
+
+Para iniciar apenas o PostgreSQL e desenvolver o backend e o frontend pelo
+terminal:
+
+```bash
+docker compose up -d db
+npm run dev:backend
+npm run dev:frontend
+```
+
+Para construir e iniciar a aplicação completa em contêineres:
+
+```bash
+docker compose up -d --build
+```
+
+Depois, acesse:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:3333`
+- Saúde da API: `http://localhost:3333/health`
+
+Ao iniciar o backend em contêiner, as migrações pendentes do Prisma são
+aplicadas automaticamente. Para acompanhar os serviços:
+
+```bash
+docker compose ps
+docker compose logs -f
+```
+
+Para encerrar os serviços sem apagar os dados:
+
+```bash
+docker compose down
+```
+
 Crie o arquivo de ambiente do backend:
 
 ```powershell
