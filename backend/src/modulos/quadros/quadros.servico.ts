@@ -6,6 +6,11 @@ import type {
 } from "./quadros.esquema.js";
 
 const inclusaoDetalhesQuadro = {
+  labels: {
+    orderBy: {
+      createdAt: "asc"
+    }
+  },
   lists: {
     orderBy: {
       position: "asc"
@@ -14,6 +19,25 @@ const inclusaoDetalhesQuadro = {
       cards: {
         orderBy: {
           position: "asc"
+        },
+        include: {
+          labels: {
+            orderBy: {
+              createdAt: "asc"
+            }
+          },
+          checklists: {
+            orderBy: {
+              position: "asc"
+            },
+            include: {
+              items: {
+                orderBy: {
+                  position: "asc"
+                }
+              }
+            }
+          }
         }
       }
     }

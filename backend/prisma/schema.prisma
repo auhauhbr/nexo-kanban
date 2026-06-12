@@ -25,6 +25,7 @@ model Board {
   updatedAt DateTime @updatedAt
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   lists     List[]
+  labels    Label[]
 
   @@index([ownerId])
 }
@@ -46,11 +47,53 @@ model Card {
   id          String   @id @default(uuid())
   title       String
   description String?
+  dueDate     DateTime?
   position    Int
   listId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  labels      Label[]
+  checklists  Checklist[]
 
   @@index([listId, position])
+}
+
+model Label {
+  id        String   @id @default(uuid())
+  name      String
+  color     String
+  boardId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards     Card[]
+
+  @@index([boardId])
+}
+
+model Checklist {
+  id        String          @id @default(uuid())
+  title     String
+  position  Int
+  cardId    String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  card      Card            @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  items     ChecklistItem[]
+
+  @@index([cardId, position])
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid())
+  text        String
+  done        Boolean   @default(false)
+  position    Int
+  checklistId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@index([checklistId, position])
 }

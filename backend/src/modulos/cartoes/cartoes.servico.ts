@@ -2,6 +2,26 @@ import { prisma } from "../../configuracao/prisma.js";
 import { ErroAplicacao } from "../../utilitarios/erro-aplicacao.js";
 import type { EntradaCriarCartao, EntradaAtualizarCartao } from "./cartoes.esquema.js";
 
+const inclusaoDetalhesCartao = {
+  labels: {
+    orderBy: {
+      createdAt: "asc"
+    }
+  },
+  checklists: {
+    orderBy: {
+      position: "asc"
+    },
+    include: {
+      items: {
+        orderBy: {
+          position: "asc"
+        }
+      }
+    }
+  }
+} as const;
+
 const buscarListaDoProprietario = async (idProprietario: string, idLista: string) => {
   const lista = await prisma.list.findFirst({
     where: {
@@ -34,7 +54,8 @@ const buscarCartaoDoProprietario = async (idProprietario: string, idCartao: stri
         select: {
           boardId: true
         }
-      }
+      },
+      ...inclusaoDetalhesCartao
     }
   });
 
@@ -65,7 +86,8 @@ export const criarCartao = async (
         description: entrada.description,
         position: (ultimoCartao?.position ?? -1) + 1,
         listId: idLista
-      }
+      },
+      include: inclusaoDetalhesCartao
     });
 
     await transacao.board.update({
@@ -180,9 +202,11 @@ export const atualizarCartao = async (
       data: {
         title: entrada.title,
         description: entrada.description,
+        dueDate: entrada.dueDate,
         listId: idListaDestino,
         position: posicao
-      }
+      },
+      include: inclusaoDetalhesCartao
     });
 
     await transacao.board.update({
