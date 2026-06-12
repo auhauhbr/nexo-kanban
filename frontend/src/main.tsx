@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import { Aplicacao } from "./Aplicacao";
 import { ProvedorAutenticacao } from "./contexto/ContextoAutenticacao";
+import { ProvedorNotificacoes } from "./contexto/ContextoNotificacoes";
 import "./estilos.css";
 
 const clienteConsultas = new QueryClient();
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={clienteConsultas}>
       <BrowserRouter>
         <ProvedorAutenticacao>
-          <Aplicacao />
+          <ProvedorNotificacoes>
+            <Aplicacao />
+          </ProvedorNotificacoes>
         </ProvedorAutenticacao>
       </BrowserRouter>
     </QueryClientProvider>
