@@ -55,3 +55,6 @@ npm run db:studio --workspace backend
 ## Endpoints atuais
 
 - `GET /health`: confirma que a API e o PostgreSQL estao online
+- `POST /auth/register`: cria uma conta e retorna um JWT
+- `POST /auth/login`: autentica uma conta e retorna um JWT
+- `GET /auth/me`: retorna o usuario autenticado
