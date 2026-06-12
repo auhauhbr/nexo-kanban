@@ -51,6 +51,7 @@ export function PaginaEntrar() {
             autoComplete="email"
             id="login-email"
             onChange={(evento) => definirEmail(evento.target.value)}
+            maxLength={254}
             placeholder="seu@email.com"
             required
             type="email"
@@ -65,6 +66,7 @@ export function PaginaEntrar() {
               autoComplete="current-password"
               id="login-password"
               minLength={8}
+              maxLength={72}
               onChange={(evento) => definirSenha(evento.target.value)}
               required
               type={mostrarSenha ? "text" : "password"}

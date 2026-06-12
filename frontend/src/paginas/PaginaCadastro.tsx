@@ -12,7 +12,9 @@ export function PaginaCadastro() {
   const [nome, definirNome] = useState("");
   const [email, definirEmail] = useState("");
   const [senha, definirSenha] = useState("");
+  const [confirmacaoSenha, definirConfirmacaoSenha] = useState("");
   const [mostrarSenha, definirMostrarSenha] = useState(false);
+  const [mostrarConfirmacao, definirMostrarConfirmacao] = useState(false);
   const [erro, definirErro] = useState("");
   const [enviando, definirEnviando] = useState(false);
 
@@ -23,6 +25,12 @@ export function PaginaCadastro() {
   const enviarFormulario = async (evento: FormEvent) => {
     evento.preventDefault();
     definirErro("");
+
+    if (senha !== confirmacaoSenha) {
+      definirErro("As senhas informadas não são iguais.");
+      return;
+    }
+
     definirEnviando(true);
 
     try {
@@ -51,6 +59,7 @@ export function PaginaCadastro() {
             autoComplete="name"
             id="register-name"
             minLength={2}
+            maxLength={80}
             onChange={(evento) => definirNome(evento.target.value)}
             placeholder="Seu nome"
             required
@@ -64,6 +73,7 @@ export function PaginaCadastro() {
             autoComplete="email"
             id="register-email"
             onChange={(evento) => definirEmail(evento.target.value)}
+            maxLength={254}
             placeholder="seu@email.com"
             required
             type="email"
@@ -77,7 +87,8 @@ export function PaginaCadastro() {
             <input
               autoComplete="new-password"
               id="register-password"
-              minLength={8}
+              minLength={10}
+              maxLength={72}
               onChange={(evento) => definirSenha(evento.target.value)}
               required
               type={mostrarSenha ? "text" : "password"}
@@ -91,12 +102,60 @@ export function PaginaCadastro() {
               {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </span>
-          <small>Mínimo de 8 caracteres.</small>
+          <small className="requisitos-senha">
+            <span className={senha.length >= 10 ? "requisito-atendido" : ""}>
+              10 caracteres
+            </span>
+            <span className={/[A-Za-zÀ-ÿ]/.test(senha) ? "requisito-atendido" : ""}>
+              uma letra
+            </span>
+            <span className={/[0-9]/.test(senha) ? "requisito-atendido" : ""}>
+              um número
+            </span>
+          </small>
+        </label>
+
+        <label htmlFor="register-password-confirmation">
+          Repita a senha
+          <span className="campo-senha">
+            <input
+              autoComplete="new-password"
+              id="register-password-confirmation"
+              maxLength={72}
+              minLength={10}
+              onChange={(evento) => definirConfirmacaoSenha(evento.target.value)}
+              required
+              type={mostrarConfirmacao ? "text" : "password"}
+              value={confirmacaoSenha}
+            />
+            <button
+              aria-label={mostrarConfirmacao ? "Ocultar confirmação" : "Mostrar confirmação"}
+              onClick={() => definirMostrarConfirmacao((visivel) => !visivel)}
+              type="button"
+            >
+              {mostrarConfirmacao ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </span>
+          {confirmacaoSenha ? (
+            <small className={senha === confirmacaoSenha ? "senhas-iguais" : "senhas-diferentes"}>
+              {senha === confirmacaoSenha ? "As senhas são iguais." : "As senhas ainda não coincidem."}
+            </small>
+          ) : null}
         </label>
 
         {erro ? <p className="erro-formulario">{erro}</p> : null}
 
-        <button className="botao-principal" disabled={enviando} type="submit">
+        <button
+          className="botao-principal"
+          disabled={
+            enviando ||
+            senha !== confirmacaoSenha ||
+            senha.length < 10 ||
+            !/[A-Za-zÀ-ÿ]/.test(senha) ||
+            !/[0-9]/.test(senha)
+          }
+          type="submit"
+        >
           {enviando ? "Criando..." : "Criar conta"}
           <ArrowRight size={19} />
         </button>
