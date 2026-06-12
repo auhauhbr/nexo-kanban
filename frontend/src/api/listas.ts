@@ -46,3 +46,10 @@ export const moverLista = async ({
   );
   return resposta.list;
 };
+
+export const arquivarLista = async (idLista: string) => {
+  const { data } = await api.patch<{ list: Lista }>(`/lists/${idLista}`, {
+    archived: true
+  });
+  return data.list;
+};

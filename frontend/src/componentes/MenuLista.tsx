@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
+import { Archive, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 interface PropriedadesMenuLista {
@@ -9,6 +9,7 @@ interface PropriedadesMenuLista {
   erro: string;
   aoSalvar: (titulo: string) => Promise<unknown>;
   aoExcluir: () => Promise<unknown>;
+  aoArquivar: () => Promise<unknown>;
 }
 
 export function MenuLista({
@@ -18,7 +19,8 @@ export function MenuLista({
   excluindo,
   erro,
   aoSalvar,
-  aoExcluir
+  aoExcluir,
+  aoArquivar
 }: PropriedadesMenuLista) {
   const [aberto, definirAberto] = useState(false);
   const [modo, definirModo] = useState<"menu" | "editar" | "excluir">("menu");
@@ -88,6 +90,17 @@ export function MenuLista({
           <button onClick={() => definirModo("editar")} type="button">
             <Pencil size={14} />
             Renomear lista
+          </button>
+          <button
+            disabled={ocupado}
+            onClick={async () => {
+              await aoArquivar();
+              fechar();
+            }}
+            type="button"
+          >
+            <Archive size={14} />
+            Arquivar lista
           </button>
           <button onClick={() => definirModo("excluir")} type="button">
             <Trash2 size={14} />

@@ -27,12 +27,35 @@ export interface Cartao {
   title: string;
   description: string | null;
   dueDate: string | null;
+  number: number;
+  coverColor: string | null;
+  archived: boolean;
   position: number;
   listId: string;
   createdAt: string;
   updatedAt: string;
   labels: Etiqueta[];
   checklists: Checklist[];
+  activities: Atividade[];
+  attachments: Anexo[];
+}
+
+export interface Atividade {
+  id: string;
+  type: string;
+  message: string;
+  cardId: string;
+  userId: string;
+  createdAt: string;
+  user: { id: string; name: string };
+}
+
+export interface Anexo {
+  id: string;
+  title: string;
+  url: string;
+  cardId: string;
+  createdAt: string;
 }
 
 export interface Etiqueta {
@@ -71,6 +94,7 @@ export interface Lista {
   boardId: string;
   createdAt: string;
   updatedAt: string;
+  archived: boolean;
   cards: Cartao[];
 }
 

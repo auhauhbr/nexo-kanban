@@ -1,5 +1,12 @@
 import type { DragEvent } from "react";
-import { CalendarDays, CheckSquare, GripVertical } from "lucide-react";
+import {
+  CalendarDays,
+  CheckSquare,
+  GripVertical,
+  MessageSquare,
+  MoreHorizontal,
+  Paperclip
+} from "lucide-react";
 
 import type { Cartao, Lista } from "../tipos";
 import { FormularioNovoCartao } from "./FormularioNovoCartao";
@@ -24,6 +31,7 @@ interface PropriedadesColunaQuadro {
   erroLista: string;
   aoRenomearLista: (idLista: string, titulo: string) => Promise<unknown>;
   aoExcluirLista: (idLista: string) => Promise<unknown>;
+  aoArquivarLista: (idLista: string) => Promise<unknown>;
   aoIniciarArrasteLista: (idLista: string) => void;
   aoFinalizarArrasteLista: () => void;
   aoSoltarLista: (posicao: number) => void;
@@ -45,6 +53,7 @@ export function ColunaQuadro({
   erroLista,
   aoRenomearLista,
   aoExcluirLista,
+  aoArquivarLista,
   aoIniciarArrasteLista,
   aoFinalizarArrasteLista,
   aoSoltarLista,
@@ -101,6 +110,7 @@ export function ColunaQuadro({
           <span>{lista.cards.length}</span>
         </div>
         <MenuLista
+          aoArquivar={() => aoArquivarLista(lista.id)}
           aoExcluir={() => aoExcluirLista(lista.id)}
           aoSalvar={(titulo) => aoRenomearLista(lista.id, titulo)}
           erro={erroLista}
@@ -141,6 +151,13 @@ export function ColunaQuadro({
               onClick={() => aoSelecionarCartao(cartao, lista.title)}
               type="button"
             >
+              {cartao.coverColor ? (
+                <span
+                  aria-hidden="true"
+                  className="capa-cartao"
+                  style={{ background: cartao.coverColor }}
+                />
+              ) : null}
               {cartao.labels.length ? (
                 <div className="etiquetas-cartao">
                   {cartao.labels.map((etiqueta) => (
@@ -152,9 +169,16 @@ export function ColunaQuadro({
                   ))}
                 </div>
               ) : null}
-              <h3>{cartao.title}</h3>
+              <div className="titulo-cartao-tarefa">
+                <span>#{cartao.number || "—"}</span>
+                <h3>{cartao.title}</h3>
+                <MoreHorizontal aria-hidden="true" size={15} />
+              </div>
               {cartao.description ? <p>{cartao.description}</p> : null}
-              {cartao.dueDate || cartao.checklists.length ? (
+              {cartao.dueDate ||
+              cartao.checklists.length ||
+              cartao.attachments.length ||
+              cartao.activities.some((atividade) => atividade.type === "comment") ? (
                 <div className="metadados-cartao">
                   {cartao.dueDate ? (
                     <span
@@ -177,6 +201,18 @@ export function ColunaQuadro({
                         (total, checklist) => total + checklist.items.length,
                         0
                       )}
+                    </span>
+                  ) : null}
+                  {cartao.attachments.length ? (
+                    <span>
+                      <Paperclip size={12} />
+                      {cartao.attachments.length}
+                    </span>
+                  ) : null}
+                  {cartao.activities.some((atividade) => atividade.type === "comment") ? (
+                    <span>
+                      <MessageSquare size={12} />
+                      {cartao.activities.filter((atividade) => atividade.type === "comment").length}
                     </span>
                   ) : null}
                 </div>

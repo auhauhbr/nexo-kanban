@@ -1,4 +1,4 @@
-import { CheckSquare, Plus, Tag, Trash2 } from "lucide-react";
+import { CheckSquare, Palette, Plus, Tag, Trash2 } from "lucide-react";
 import { useState, type CSSProperties, type FormEvent } from "react";
 
 import type { Cartao, Etiqueta } from "../tipos";
@@ -15,6 +15,7 @@ interface PropriedadesRecursosCartao {
   aoCriarItem: (idChecklist: string, texto: string) => Promise<unknown>;
   aoAlternarItem: (idItem: string, concluido: boolean) => Promise<unknown>;
   aoExcluirItem: (idItem: string) => Promise<unknown>;
+  aoAlterarCapa: (cor: string | null) => Promise<unknown>;
 }
 
 const cores = ["#165dff", "#ff6b4a", "#27ae60", "#8b5cf6", "#d59c00", "#d92d20"];
@@ -30,7 +31,8 @@ export function RecursosCartao({
   aoExcluirChecklist,
   aoCriarItem,
   aoAlternarItem,
-  aoExcluirItem
+  aoExcluirItem,
+  aoAlterarCapa
 }: PropriedadesRecursosCartao) {
   const [nomeEtiqueta, definirNomeEtiqueta] = useState("");
   const [corEtiqueta, definirCorEtiqueta] = useState(cores[0]);
@@ -54,6 +56,34 @@ export function RecursosCartao({
 
   return (
     <div className="recursos-cartao">
+      <section className="secao-recurso-cartao">
+        <header>
+          <Palette size={15} />
+          <strong>Capa do cartão</strong>
+        </header>
+        <div className="paleta-capa-cartao">
+          {cores.map((cor) => (
+            <button
+              aria-label={`Usar capa ${cor}`}
+              className={cartao.coverColor === cor ? "capa-selecionada" : ""}
+              disabled={ocupado}
+              key={cor}
+              onClick={() => aoAlterarCapa(cor)}
+              style={{ background: cor }}
+              type="button"
+            />
+          ))}
+          <button
+            className="remover-capa"
+            disabled={ocupado || !cartao.coverColor}
+            onClick={() => aoAlterarCapa(null)}
+            type="button"
+          >
+            Remover
+          </button>
+        </div>
+      </section>
+
       <section className="secao-recurso-cartao">
         <header>
           <Tag size={15} />

@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import * as apiCartoes from "../api/cartoes";
 import * as apiChecklists from "../api/checklists";
 import * as apiEtiquetas from "../api/etiquetas";
+import * as apiInteracoes from "../api/interacoes";
 import * as apiListas from "../api/listas";
 import * as apiQuadros from "../api/quadros";
 import { ColunaQuadro } from "../componentes/ColunaQuadro";
@@ -90,6 +91,13 @@ export function PaginaQuadro() {
     onSuccess: () => {
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
       mostrarSucesso("Lista excluída.");
+    }
+  });
+  const arquivamentoLista = useMutation({
+    mutationFn: apiListas.arquivarLista,
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Lista arquivada.");
     }
   });
   const movimentacaoLista = useMutation({
@@ -197,9 +205,9 @@ export function PaginaQuadro() {
         )
       : "";
   const mensagemErroLista =
-    edicaoLista.error || exclusaoLista.error
+    edicaoLista.error || exclusaoLista.error || arquivamentoLista.error
       ? obterMensagemErro(
-          edicaoLista.error ?? exclusaoLista.error,
+          edicaoLista.error ?? exclusaoLista.error ?? arquivamentoLista.error,
           "Não foi possível atualizar a lista."
         )
       : "";
@@ -325,6 +333,7 @@ export function PaginaQuadro() {
             aoIniciarArraste={definirIdCartaoArrastado}
             aoIniciarArrasteLista={definirIdListaArrastada}
             aoExcluirLista={(idLista) => exclusaoLista.mutateAsync(idLista)}
+            aoArquivarLista={(idLista) => arquivamentoLista.mutateAsync(idLista)}
             aoRenomearLista={(idLista, titulo) =>
               edicaoLista.mutateAsync({ idLista, titulo })
             }
@@ -342,6 +351,7 @@ export function PaginaQuadro() {
             erroLista={
               edicaoLista.variables?.idLista === lista.id ||
               exclusaoLista.variables === lista.id
+              || arquivamentoLista.variables === lista.id
                 ? mensagemErroLista
                 : ""
             }
@@ -366,6 +376,29 @@ export function PaginaQuadro() {
 
       {cartaoSelecionado && cartaoAberto ? (
         <ModalEditarCartao
+          aoAlterarCapa={(cor) =>
+            recursosCartao.mutateAsync(() =>
+              apiCartoes.atualizarRecursosCartao({
+                idCartao: cartaoAberto.id,
+                capa: cor
+              })
+            )
+          }
+          aoAnexarLink={(titulo, url) =>
+            recursosCartao.mutateAsync(() =>
+              apiInteracoes.anexarLink({ idCartao: cartaoAberto.id, titulo, url })
+            )
+          }
+          aoArquivar={async () => {
+            await recursosCartao.mutateAsync(() =>
+              apiCartoes.atualizarRecursosCartao({
+                idCartao: cartaoAberto.id,
+                arquivado: true
+              })
+            );
+            definirCartaoSelecionado(null);
+            mostrarSucesso("Cartão arquivado.");
+          }}
           aoAlternarEtiqueta={(idEtiqueta, vinculada) =>
             recursosCartao.mutateAsync(() =>
               vinculada
@@ -402,6 +435,11 @@ export function PaginaQuadro() {
               apiChecklists.criarItem({ idChecklist, texto })
             )
           }
+          aoComentar={(mensagem) =>
+            recursosCartao.mutateAsync(() =>
+              apiInteracoes.comentar({ idCartao: cartaoAberto.id, mensagem })
+            )
+          }
           aoExcluirChecklist={(idChecklist) =>
             recursosCartao.mutateAsync(() =>
               apiChecklists.excluirChecklist(idChecklist)
@@ -414,6 +452,9 @@ export function PaginaQuadro() {
           }
           aoExcluirItem={(idItem) =>
             recursosCartao.mutateAsync(() => apiChecklists.excluirItem(idItem))
+          }
+          aoExcluirAnexo={(idAnexo) =>
+            recursosCartao.mutateAsync(() => apiInteracoes.excluirAnexo(idAnexo))
           }
           aoFechar={() => definirCartaoSelecionado(null)}
           aoExcluir={() => exclusaoCartao.mutateAsync(cartaoAberto.id)}

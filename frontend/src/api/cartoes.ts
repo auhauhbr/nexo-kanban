@@ -64,3 +64,19 @@ export const moverCartao = async ({
 export const excluirCartao = async (idCartao: string) => {
   await api.delete(`/cards/${idCartao}`);
 };
+
+export const atualizarRecursosCartao = async ({
+  idCartao,
+  capa,
+  arquivado
+}: {
+  idCartao: string;
+  capa?: string | null;
+  arquivado?: boolean;
+}) => {
+  const { data } = await api.patch<{ card: Cartao }>(`/cards/${idCartao}`, {
+    coverColor: capa,
+    archived: arquivado
+  });
+  return data.card;
+};

@@ -1,8 +1,9 @@
-import { AlignLeft, CalendarDays, Trash2, X } from "lucide-react";
+import { AlignLeft, Archive, CalendarDays, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Cartao, Etiqueta } from "../tipos";
 import { RecursosCartao } from "./RecursosCartao";
+import { InteracoesCartao } from "./InteracoesCartao";
 
 interface PropriedadesModalEditarCartao {
   cartao: Cartao;
@@ -23,6 +24,11 @@ interface PropriedadesModalEditarCartao {
   aoCriarItem: (idChecklist: string, texto: string) => Promise<unknown>;
   aoAlternarItem: (idItem: string, concluido: boolean) => Promise<unknown>;
   aoExcluirItem: (idItem: string) => Promise<unknown>;
+  aoAlterarCapa: (cor: string | null) => Promise<unknown>;
+  aoArquivar: () => Promise<unknown>;
+  aoComentar: (mensagem: string) => Promise<unknown>;
+  aoAnexarLink: (titulo: string, url: string) => Promise<unknown>;
+  aoExcluirAnexo: (idAnexo: string) => Promise<unknown>;
 }
 
 export function ModalEditarCartao({
@@ -43,7 +49,12 @@ export function ModalEditarCartao({
   aoExcluirChecklist,
   aoCriarItem,
   aoAlternarItem,
-  aoExcluirItem
+  aoExcluirItem,
+  aoAlterarCapa,
+  aoArquivar,
+  aoComentar,
+  aoAnexarLink,
+  aoExcluirAnexo
 }: PropriedadesModalEditarCartao) {
   const [titulo, definirTitulo] = useState(cartao.title);
   const [descricao, definirDescricao] = useState(cartao.description ?? "");
@@ -100,7 +111,7 @@ export function ModalEditarCartao({
       <div className="modal-cartao">
         <header>
           <div>
-            <span>Cartão em {nomeLista}</span>
+            <span>Cartão #{cartao.number || "—"} em {nomeLista}</span>
             <h2 id="titulo-modal-cartao">Editar cartão</h2>
           </div>
           <button
@@ -113,59 +124,75 @@ export function ModalEditarCartao({
           </button>
         </header>
 
-        <label htmlFor="titulo-cartao">
-          Título
-          <input
-            autoFocus
-            id="titulo-cartao"
-            maxLength={200}
-            onChange={(evento) => definirTitulo(evento.target.value)}
-            required
-            value={titulo}
-          />
-        </label>
+        {cartao.coverColor ? (
+          <div className="capa-modal-cartao" style={{ background: cartao.coverColor }} />
+        ) : null}
 
-        <label htmlFor="descricao-cartao">
-          <span>
-            <AlignLeft size={15} />
-            Descrição
-          </span>
-          <textarea
-            id="descricao-cartao"
-            maxLength={5000}
-            onChange={(evento) => definirDescricao(evento.target.value)}
-            placeholder="Adicione mais detalhes sobre este cartão."
-            rows={7}
-            value={descricao}
-          />
-        </label>
+        <div className="conteudo-modal-cartao">
+          <div className="edicao-modal-cartao">
+            <label htmlFor="titulo-cartao">
+              Título
+              <input
+                autoFocus
+                id="titulo-cartao"
+                maxLength={200}
+                onChange={(evento) => definirTitulo(evento.target.value)}
+                required
+                value={titulo}
+              />
+            </label>
 
-        <label htmlFor="prazo-cartao">
-          <span>
-            <CalendarDays size={15} />
-            Prazo
-          </span>
-          <input
-            id="prazo-cartao"
-            onChange={(evento) => definirPrazo(evento.target.value)}
-            type="datetime-local"
-            value={prazo}
-          />
-        </label>
+            <label htmlFor="descricao-cartao">
+              <span>
+                <AlignLeft size={15} />
+                Descrição
+              </span>
+              <textarea
+                id="descricao-cartao"
+                maxLength={5000}
+                onChange={(evento) => definirDescricao(evento.target.value)}
+                placeholder="Adicione mais detalhes sobre este cartão."
+                rows={7}
+                value={descricao}
+              />
+            </label>
 
-        <RecursosCartao
-          aoAlternarEtiqueta={aoAlternarEtiqueta}
-          aoAlternarItem={aoAlternarItem}
-          aoCriarChecklist={aoCriarChecklist}
-          aoCriarEtiqueta={aoCriarEtiqueta}
-          aoCriarItem={aoCriarItem}
-          aoExcluirChecklist={aoExcluirChecklist}
-          aoExcluirEtiqueta={aoExcluirEtiqueta}
-          aoExcluirItem={aoExcluirItem}
-          cartao={cartao}
-          etiquetasQuadro={etiquetasQuadro}
-          ocupado={ocupado}
-        />
+            <label htmlFor="prazo-cartao">
+              <span>
+                <CalendarDays size={15} />
+                Prazo
+              </span>
+              <input
+                id="prazo-cartao"
+                onChange={(evento) => definirPrazo(evento.target.value)}
+                type="datetime-local"
+                value={prazo}
+              />
+            </label>
+
+            <RecursosCartao
+              aoAlterarCapa={aoAlterarCapa}
+              aoAlternarEtiqueta={aoAlternarEtiqueta}
+              aoAlternarItem={aoAlternarItem}
+              aoCriarChecklist={aoCriarChecklist}
+              aoCriarEtiqueta={aoCriarEtiqueta}
+              aoCriarItem={aoCriarItem}
+              aoExcluirChecklist={aoExcluirChecklist}
+              aoExcluirEtiqueta={aoExcluirEtiqueta}
+              aoExcluirItem={aoExcluirItem}
+              cartao={cartao}
+              etiquetasQuadro={etiquetasQuadro}
+              ocupado={ocupado}
+            />
+          </div>
+          <InteracoesCartao
+            aoAnexarLink={aoAnexarLink}
+            aoComentar={aoComentar}
+            aoExcluirAnexo={aoExcluirAnexo}
+            cartao={cartao}
+            ocupado={ocupado}
+          />
+        </div>
 
         {erro ? <p className="erro-modal-cartao">{erro}</p> : null}
         {erroExclusao ? (
@@ -197,6 +224,15 @@ export function ModalEditarCartao({
               >
                 <Trash2 size={14} />
                 Excluir
+              </button>
+              <button
+                className="botao-arquivar-cartao"
+                disabled={ocupado}
+                onClick={aoArquivar}
+                type="button"
+              >
+                <Archive size={14} />
+                Arquivar
               </button>
               <span />
               <button disabled={ocupado} onClick={aoFechar} type="button">
