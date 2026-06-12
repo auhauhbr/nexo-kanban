@@ -1,12 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
+import { usarNotificacoes } from "../contexto/ContextoNotificacoes";
 import { criarClienteTempoReal } from "../tempo-real/cliente";
 
 type EstadoConexao = "conectando" | "conectado" | "desconectado" | "erro";
 
 export const usarTempoRealQuadro = (idQuadro: string) => {
   const clienteConsultas = useQueryClient();
+  const { mostrarErro } = usarNotificacoes();
   const [estado, definirEstado] = useState<EstadoConexao>("conectando");
 
   useEffect(() => {
@@ -40,13 +42,17 @@ export const usarTempoRealQuadro = (idQuadro: string) => {
     cliente.on("disconnect", () => definirEstado("desconectado"));
     cliente.on("connect_error", () => definirEstado("erro"));
     cliente.on("board:updated", atualizarQuadro);
+    cliente.on("card:due-soon", ({ card }: { card: { title: string } }) => {
+      mostrarErro(`Prazo próximo: ${card.title}`);
+    });
     cliente.connect();
 
     return () => {
       cliente.off("board:updated", atualizarQuadro);
+      cliente.off("card:due-soon");
       cliente.disconnect();
     };
-  }, [clienteConsultas, idQuadro]);
+  }, [clienteConsultas, idQuadro, mostrarErro]);
 
   return estado;
 };

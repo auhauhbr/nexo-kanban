@@ -1389,6 +1389,19 @@ a {
   line-height: 1.5;
 }
 
+.etiquetas-cartao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.etiquetas-cartao span {
+  width: 34px;
+  height: 5px;
+  border-radius: 999px;
+}
+
 .cartao-tarefa p {
   display: -webkit-box;
   overflow: hidden;
@@ -1398,6 +1411,41 @@ a {
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.metadados-cartao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.metadados-cartao span {
+  display: flex;
+  min-height: 23px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-radius: 6px;
+  color: #68768a;
+  background: #eef2f7;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.metadados-cartao .prazo-atrasado {
+  color: #b42318;
+  background: #fff0ef;
+}
+
+.metadados-cartao .prazo-proximo {
+  color: #8a6500;
+  background: #fff8df;
+}
+
+.metadados-cartao .prazo-normal {
+  color: #3366a8;
+  background: #eaf2ff;
 }
 
 .lista-sem-cartoes {
@@ -1569,6 +1617,194 @@ a {
   color: #344054;
   font-size: 11px;
   font-weight: 700;
+}
+
+.recursos-cartao {
+  display: grid;
+  gap: 14px;
+  margin: 6px 0 22px;
+}
+
+.secao-recurso-cartao {
+  padding: 14px;
+  border: 1px solid #e1e7ef;
+  border-radius: 11px;
+  background: #f8fafc;
+}
+
+.secao-recurso-cartao > header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  margin: 0 0 12px;
+  color: #344054;
+}
+
+.secao-recurso-cartao > header strong {
+  font-size: 11px;
+}
+
+.lista-etiquetas-modal {
+  display: grid;
+  gap: 6px;
+}
+
+.linha-etiqueta-modal {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  gap: 5px;
+}
+
+.linha-etiqueta-modal button {
+  min-height: 31px;
+  border: 1px solid #dbe2ec;
+  border-radius: 7px;
+  color: #536176;
+  background: #fff;
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.linha-etiqueta-modal button:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  text-align: left;
+}
+
+.linha-etiqueta-modal button:first-child span {
+  width: 24px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--cor-etiqueta);
+}
+
+.linha-etiqueta-modal button.etiqueta-selecionada {
+  border-color: var(--cor-etiqueta);
+  box-shadow: inset 3px 0 var(--cor-etiqueta);
+}
+
+.formulario-recurso {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.formulario-recurso input,
+.formulario-recurso select {
+  min-width: 0;
+  min-height: 34px;
+  flex: 1;
+  padding: 0 9px;
+  border: 1px solid #d4dce7;
+  border-radius: 7px;
+  outline: none;
+  color: #344054;
+  background: #fff;
+  font-size: 9px;
+}
+
+.formulario-recurso select {
+  max-width: 48px;
+  color: transparent;
+  cursor: pointer;
+}
+
+.formulario-recurso button,
+.cabecalho-checklist-modal button,
+.itens-checklist button {
+  display: grid;
+  width: 34px;
+  border: 0;
+  border-radius: 7px;
+  place-items: center;
+  color: #fff;
+  background: var(--blue);
+  cursor: pointer;
+}
+
+.checklist-modal {
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #e0e6ef;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.cabecalho-checklist-modal {
+  display: grid;
+  grid-template-columns: 1fr auto 28px;
+  align-items: center;
+  gap: 7px;
+}
+
+.cabecalho-checklist-modal strong {
+  color: #344054;
+  font-size: 10px;
+}
+
+.cabecalho-checklist-modal span {
+  color: #778397;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.cabecalho-checklist-modal button,
+.itens-checklist button {
+  width: 28px;
+  height: 28px;
+  color: #8a96a8;
+  background: transparent;
+}
+
+.progresso-checklist {
+  overflow: hidden;
+  height: 5px;
+  margin: 9px 0;
+  border-radius: 999px;
+  background: #e8edf4;
+}
+
+.progresso-checklist span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
+  transition: width 180ms ease;
+}
+
+.itens-checklist {
+  display: grid;
+  gap: 5px;
+}
+
+.itens-checklist > div {
+  display: grid;
+  grid-template-columns: 17px 1fr 28px;
+  align-items: center;
+  gap: 5px;
+  color: #536176;
+  font-size: 9px;
+}
+
+.itens-checklist input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--blue);
+}
+
+.item-concluido {
+  color: #98a2b3;
+  text-decoration: line-through;
+}
+
+.recursos-cartao button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .modal-cartao label > span {

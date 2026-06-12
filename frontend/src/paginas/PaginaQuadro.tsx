@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import * as apiCartoes from "../api/cartoes";
+import * as apiChecklists from "../api/checklists";
+import * as apiEtiquetas from "../api/etiquetas";
 import * as apiListas from "../api/listas";
 import * as apiQuadros from "../api/quadros";
 import { ColunaQuadro } from "../componentes/ColunaQuadro";
@@ -13,7 +15,7 @@ import { MenuQuadro } from "../componentes/MenuQuadro";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
 import { usarNotificacoes } from "../contexto/ContextoNotificacoes";
 import { usarTempoRealQuadro } from "../hooks/usarTempoRealQuadro";
-import type { Cartao, Quadro } from "../tipos";
+import type { Quadro } from "../tipos";
 import {
   moverCartaoNoQuadro,
   type MovimentoCartao
@@ -39,7 +41,7 @@ export function PaginaQuadro() {
   const chaveConsultaQuadro = ["quadro", idQuadro];
   const estadoTempoReal = usarTempoRealQuadro(idQuadro);
   const [cartaoSelecionado, definirCartaoSelecionado] = useState<{
-    cartao: Cartao;
+    idCartao: string;
     nomeLista: string;
   } | null>(null);
   const [idCartaoArrastado, definirIdCartaoArrastado] = useState<string | null>(
@@ -141,6 +143,15 @@ export function PaginaQuadro() {
       mostrarSucesso("Cartão excluído.");
     }
   });
+  const recursosCartao = useMutation({
+    mutationFn: async (acao: () => Promise<unknown>) => acao(),
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro }),
+    onError: (erro) =>
+      mostrarErro(
+        obterMensagemErro(erro, "Não foi possível atualizar os recursos do cartão.")
+      )
+  });
   const movimentacaoCartao = useMutation({
     mutationFn: ({ idCartao, idListaDestino, posicaoDestino }: MovimentoCartao) =>
       apiCartoes.moverCartao({
@@ -219,6 +230,11 @@ export function PaginaQuadro() {
   }
 
   const quadro = consultaQuadro.data;
+  const cartaoAberto = cartaoSelecionado
+    ? quadro.lists
+        .flatMap((lista) => lista.cards)
+        .find((cartao) => cartao.id === cartaoSelecionado.idCartao)
+    : undefined;
   const quantidadeCartoes = quadro.lists.reduce(
     (total, lista) => total + lista.cards.length,
     0
@@ -302,7 +318,7 @@ export function PaginaQuadro() {
               criacaoCartao.mutateAsync({ idLista, titulo, descricao })
             }
             aoSelecionarCartao={(cartao, nomeLista) =>
-              definirCartaoSelecionado({ cartao, nomeLista })
+              definirCartaoSelecionado({ idCartao: cartao.id, nomeLista })
             }
             aoFinalizarArraste={() => definirIdCartaoArrastado(null)}
             aoFinalizarArrasteLista={() => definirIdListaArrastada(null)}
@@ -348,25 +364,74 @@ export function PaginaQuadro() {
         />
       </section>
 
-      {cartaoSelecionado ? (
+      {cartaoSelecionado && cartaoAberto ? (
         <ModalEditarCartao
-          aoFechar={() => definirCartaoSelecionado(null)}
-          aoExcluir={() =>
-            exclusaoCartao.mutateAsync(cartaoSelecionado.cartao.id)
+          aoAlternarEtiqueta={(idEtiqueta, vinculada) =>
+            recursosCartao.mutateAsync(() =>
+              vinculada
+                ? apiEtiquetas.desvincularEtiqueta({
+                    idCartao: cartaoAberto.id,
+                    idEtiqueta
+                  })
+                : apiEtiquetas.vincularEtiqueta({
+                    idCartao: cartaoAberto.id,
+                    idEtiqueta
+                  })
+            )
           }
-          aoSalvar={(titulo, descricao) =>
+          aoAlternarItem={(idItem, concluido) =>
+            recursosCartao.mutateAsync(() =>
+              apiChecklists.atualizarItem({ idItem, concluido: !concluido })
+            )
+          }
+          aoCriarChecklist={(titulo) =>
+            recursosCartao.mutateAsync(() =>
+              apiChecklists.criarChecklist({
+                idCartao: cartaoAberto.id,
+                titulo
+              })
+            )
+          }
+          aoCriarEtiqueta={(nome, cor) =>
+            recursosCartao.mutateAsync(() =>
+              apiEtiquetas.criarEtiqueta({ idQuadro, nome, cor })
+            )
+          }
+          aoCriarItem={(idChecklist, texto) =>
+            recursosCartao.mutateAsync(() =>
+              apiChecklists.criarItem({ idChecklist, texto })
+            )
+          }
+          aoExcluirChecklist={(idChecklist) =>
+            recursosCartao.mutateAsync(() =>
+              apiChecklists.excluirChecklist(idChecklist)
+            )
+          }
+          aoExcluirEtiqueta={(idEtiqueta) =>
+            recursosCartao.mutateAsync(() =>
+              apiEtiquetas.excluirEtiqueta(idEtiqueta)
+            )
+          }
+          aoExcluirItem={(idItem) =>
+            recursosCartao.mutateAsync(() => apiChecklists.excluirItem(idItem))
+          }
+          aoFechar={() => definirCartaoSelecionado(null)}
+          aoExcluir={() => exclusaoCartao.mutateAsync(cartaoAberto.id)}
+          aoSalvar={(titulo, descricao, prazo) =>
             edicaoCartao.mutateAsync({
-              idCartao: cartaoSelecionado.cartao.id,
+              idCartao: cartaoAberto.id,
               titulo,
-              descricao
+              descricao,
+              prazo
             })
           }
-          cartao={cartaoSelecionado.cartao}
+          cartao={cartaoAberto}
+          etiquetasQuadro={quadro.labels}
           erro={mensagemErroEdicao}
           erroExclusao={mensagemErroExclusao}
           excluindo={exclusaoCartao.isPending}
           nomeLista={cartaoSelecionado.nomeLista}
-          salvando={edicaoCartao.isPending}
+          salvando={edicaoCartao.isPending || recursosCartao.isPending}
         />
       ) : null}
     </main>

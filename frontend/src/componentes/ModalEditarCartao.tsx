@@ -1,7 +1,8 @@
-import { AlignLeft, Trash2, X } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { AlignLeft, CalendarDays, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import type { Cartao } from "../tipos";
+import type { Cartao, Etiqueta } from "../tipos";
+import { RecursosCartao } from "./RecursosCartao";
 
 interface PropriedadesModalEditarCartao {
   cartao: Cartao;
@@ -10,9 +11,18 @@ interface PropriedadesModalEditarCartao {
   excluindo: boolean;
   erro: string;
   erroExclusao: string;
+  etiquetasQuadro: Etiqueta[];
   aoFechar: () => void;
   aoExcluir: () => Promise<unknown>;
-  aoSalvar: (titulo: string, descricao: string | null) => Promise<unknown>;
+  aoSalvar: (titulo: string, descricao: string | null, prazo: string | null) => Promise<unknown>;
+  aoCriarEtiqueta: (nome: string, cor: string) => Promise<unknown>;
+  aoAlternarEtiqueta: (idEtiqueta: string, vinculada: boolean) => Promise<unknown>;
+  aoExcluirEtiqueta: (idEtiqueta: string) => Promise<unknown>;
+  aoCriarChecklist: (titulo: string) => Promise<unknown>;
+  aoExcluirChecklist: (idChecklist: string) => Promise<unknown>;
+  aoCriarItem: (idChecklist: string, texto: string) => Promise<unknown>;
+  aoAlternarItem: (idItem: string, concluido: boolean) => Promise<unknown>;
+  aoExcluirItem: (idItem: string) => Promise<unknown>;
 }
 
 export function ModalEditarCartao({
@@ -22,12 +32,24 @@ export function ModalEditarCartao({
   excluindo,
   erro,
   erroExclusao,
+  etiquetasQuadro,
   aoFechar,
   aoExcluir,
-  aoSalvar
+  aoSalvar,
+  aoCriarEtiqueta,
+  aoAlternarEtiqueta,
+  aoExcluirEtiqueta,
+  aoCriarChecklist,
+  aoExcluirChecklist,
+  aoCriarItem,
+  aoAlternarItem,
+  aoExcluirItem
 }: PropriedadesModalEditarCartao) {
   const [titulo, definirTitulo] = useState(cartao.title);
   const [descricao, definirDescricao] = useState(cartao.description ?? "");
+  const [prazo, definirPrazo] = useState(
+    cartao.dueDate ? new Date(cartao.dueDate).toISOString().slice(0, 16) : ""
+  );
   const [confirmandoExclusao, definirConfirmandoExclusao] = useState(false);
   const ocupado = salvando || excluindo;
 
@@ -42,15 +64,17 @@ export function ModalEditarCartao({
     return () => window.removeEventListener("keydown", fecharComEscape);
   }, [aoFechar, ocupado]);
 
-  const enviarFormulario = async (evento: FormEvent) => {
-    evento.preventDefault();
-
+  const salvar = async () => {
     if (!titulo.trim()) {
       return;
     }
 
     try {
-      await aoSalvar(titulo.trim(), descricao.trim() || null);
+      await aoSalvar(
+        titulo.trim(),
+        descricao.trim() || null,
+        prazo ? new Date(prazo).toISOString() : null
+      );
       aoFechar();
     } catch {
       // A mensagem da mutação permanece visível no modal.
@@ -73,7 +97,7 @@ export function ModalEditarCartao({
       className="fundo-modal"
       role="dialog"
     >
-      <form className="modal-cartao" onSubmit={enviarFormulario}>
+      <div className="modal-cartao">
         <header>
           <div>
             <span>Cartão em {nomeLista}</span>
@@ -116,6 +140,33 @@ export function ModalEditarCartao({
           />
         </label>
 
+        <label htmlFor="prazo-cartao">
+          <span>
+            <CalendarDays size={15} />
+            Prazo
+          </span>
+          <input
+            id="prazo-cartao"
+            onChange={(evento) => definirPrazo(evento.target.value)}
+            type="datetime-local"
+            value={prazo}
+          />
+        </label>
+
+        <RecursosCartao
+          aoAlternarEtiqueta={aoAlternarEtiqueta}
+          aoAlternarItem={aoAlternarItem}
+          aoCriarChecklist={aoCriarChecklist}
+          aoCriarEtiqueta={aoCriarEtiqueta}
+          aoCriarItem={aoCriarItem}
+          aoExcluirChecklist={aoExcluirChecklist}
+          aoExcluirEtiqueta={aoExcluirEtiqueta}
+          aoExcluirItem={aoExcluirItem}
+          cartao={cartao}
+          etiquetasQuadro={etiquetasQuadro}
+          ocupado={ocupado}
+        />
+
         {erro ? <p className="erro-modal-cartao">{erro}</p> : null}
         {erroExclusao ? (
           <p className="erro-modal-cartao">{erroExclusao}</p>
@@ -151,13 +202,17 @@ export function ModalEditarCartao({
               <button disabled={ocupado} onClick={aoFechar} type="button">
                 Cancelar
               </button>
-              <button disabled={ocupado || !titulo.trim()} type="submit">
+              <button
+                disabled={ocupado || !titulo.trim()}
+                onClick={salvar}
+                type="button"
+              >
                 {salvando ? "Salvando..." : "Salvar alterações"}
               </button>
             </>
           )}
         </footer>
-      </form>
+      </div>
     </div>
   );
 }

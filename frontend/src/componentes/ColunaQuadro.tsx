@@ -1,5 +1,5 @@
 import type { DragEvent } from "react";
-import { GripVertical } from "lucide-react";
+import { CalendarDays, CheckSquare, GripVertical } from "lucide-react";
 
 import type { Cartao, Lista } from "../tipos";
 import { FormularioNovoCartao } from "./FormularioNovoCartao";
@@ -51,6 +51,16 @@ export function ColunaQuadro({
   idListaArrastada
 }: PropriedadesColunaQuadro) {
   const permitirSoltar = (evento: DragEvent) => evento.preventDefault();
+  const formatarPrazo = (prazo: string) =>
+    new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" }).format(
+      new Date(prazo)
+    );
+  const classePrazo = (prazo: string) => {
+    const diferenca = new Date(prazo).getTime() - Date.now();
+    if (diferenca < 0) return "prazo-atrasado";
+    if (diferenca <= 3 * 24 * 60 * 60 * 1000) return "prazo-proximo";
+    return "prazo-normal";
+  };
 
   return (
     <section
@@ -131,8 +141,46 @@ export function ColunaQuadro({
               onClick={() => aoSelecionarCartao(cartao, lista.title)}
               type="button"
             >
+              {cartao.labels.length ? (
+                <div className="etiquetas-cartao">
+                  {cartao.labels.map((etiqueta) => (
+                    <span
+                      key={etiqueta.id}
+                      style={{ background: etiqueta.color }}
+                      title={etiqueta.name}
+                    />
+                  ))}
+                </div>
+              ) : null}
               <h3>{cartao.title}</h3>
               {cartao.description ? <p>{cartao.description}</p> : null}
+              {cartao.dueDate || cartao.checklists.length ? (
+                <div className="metadados-cartao">
+                  {cartao.dueDate ? (
+                    <span
+                      className={classePrazo(cartao.dueDate)}
+                    >
+                      <CalendarDays size={12} />
+                      {formatarPrazo(cartao.dueDate)}
+                    </span>
+                  ) : null}
+                  {cartao.checklists.length ? (
+                    <span>
+                      <CheckSquare size={12} />
+                      {cartao.checklists.reduce(
+                        (total, checklist) =>
+                          total + checklist.items.filter((item) => item.done).length,
+                        0
+                      )}
+                      /
+                      {cartao.checklists.reduce(
+                        (total, checklist) => total + checklist.items.length,
+                        0
+                      )}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
             </button>
           ))
         )}

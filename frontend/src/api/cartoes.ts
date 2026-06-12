@@ -23,17 +23,20 @@ export const criarCartao = async ({
 export const atualizarCartao = async ({
   idCartao,
   titulo,
-  descricao
+  descricao,
+  prazo
 }: {
   idCartao: string;
   titulo: string;
   descricao: string | null;
+  prazo: string | null;
 }) => {
   const { data: resposta } = await api.patch<{ card: Cartao }>(
     `/cards/${idCartao}`,
     {
       title: titulo,
-      description: descricao
+      description: descricao,
+      dueDate: prazo
     }
   );
   return resposta.card;

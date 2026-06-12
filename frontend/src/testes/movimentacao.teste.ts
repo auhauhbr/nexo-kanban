@@ -9,6 +9,9 @@ const criarCartao = (id: string, listId: string, position: number): Cartao => ({
   id,
   title: id,
   description: null,
+  dueDate: null,
+  labels: [],
+  checklists: [],
   listId,
   position,
   createdAt: "2026-06-12T00:00:00.000Z",
@@ -31,6 +34,7 @@ const criarQuadro = (): Quadro => ({
   ownerId: "usuario-1",
   createdAt: "2026-06-12T00:00:00.000Z",
   updatedAt: "2026-06-12T00:00:00.000Z",
+  labels: [],
   lists: [
     criarLista("lista-1", 0, [
       criarCartao("cartao-1", "lista-1", 0),
