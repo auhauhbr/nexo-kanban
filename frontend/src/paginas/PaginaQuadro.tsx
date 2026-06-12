@@ -38,6 +38,16 @@ export function PaginaQuadro() {
     onSuccess: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
+  const edicaoLista = useMutation({
+    mutationFn: apiListas.atualizarTituloLista,
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
+  const exclusaoLista = useMutation({
+    mutationFn: apiListas.excluirLista,
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
   const criacaoCartao = useMutation({
     mutationFn: apiCartoes.criarCartao,
     onSuccess: () =>
@@ -92,6 +102,14 @@ export function PaginaQuadro() {
         "Não foi possível criar a lista.")
       : "Não foi possível criar a lista."
     : "";
+  const mensagemErroLista =
+    edicaoLista.error || exclusaoLista.error
+      ? axios.isAxiosError(edicaoLista.error ?? exclusaoLista.error)
+        ? ((edicaoLista.error ?? exclusaoLista.error) as {
+            response?: { data?: { message?: string } };
+          }).response?.data?.message ?? "Não foi possível atualizar a lista."
+        : "Não foi possível atualizar a lista."
+      : "";
   const mensagemErroCartao = criacaoCartao.error
     ? axios.isAxiosError(criacaoCartao.error)
       ? (criacaoCartao.error.response?.data?.message ??
@@ -179,6 +197,10 @@ export function PaginaQuadro() {
             }
             aoFinalizarArraste={() => definirIdCartaoArrastado(null)}
             aoIniciarArraste={definirIdCartaoArrastado}
+            aoExcluirLista={(idLista) => exclusaoLista.mutateAsync(idLista)}
+            aoRenomearLista={(idLista, titulo) =>
+              edicaoLista.mutateAsync({ idLista, titulo })
+            }
             aoSoltarCartao={soltarCartao}
             criandoCartao={
               criacaoCartao.isPending &&
@@ -189,9 +211,21 @@ export function PaginaQuadro() {
                 ? mensagemErroCartao
                 : ""
             }
+            erroLista={
+              edicaoLista.variables?.idLista === lista.id ||
+              exclusaoLista.variables === lista.id
+                ? mensagemErroLista
+                : ""
+            }
+            excluindoLista={
+              exclusaoLista.isPending && exclusaoLista.variables === lista.id
+            }
             key={lista.id}
             lista={lista}
             idCartaoArrastado={idCartaoArrastado}
+            salvandoLista={
+              edicaoLista.isPending && edicaoLista.variables?.idLista === lista.id
+            }
           />
         ))}
         <FormularioNovaLista

@@ -2,6 +2,7 @@ import type { DragEvent } from "react";
 
 import type { Cartao, Lista } from "../tipos";
 import { FormularioNovoCartao } from "./FormularioNovoCartao";
+import { MenuLista } from "./MenuLista";
 
 interface PropriedadesColunaQuadro {
   lista: Lista;
@@ -17,6 +18,11 @@ interface PropriedadesColunaQuadro {
   aoIniciarArraste: (idCartao: string) => void;
   aoFinalizarArraste: () => void;
   idCartaoArrastado: string | null;
+  salvandoLista: boolean;
+  excluindoLista: boolean;
+  erroLista: string;
+  aoRenomearLista: (idLista: string, titulo: string) => Promise<unknown>;
+  aoExcluirLista: (idLista: string) => Promise<unknown>;
 }
 
 export function ColunaQuadro({
@@ -28,7 +34,12 @@ export function ColunaQuadro({
   aoSoltarCartao,
   aoIniciarArraste,
   aoFinalizarArraste,
-  idCartaoArrastado
+  idCartaoArrastado,
+  salvandoLista,
+  excluindoLista,
+  erroLista,
+  aoRenomearLista,
+  aoExcluirLista
 }: PropriedadesColunaQuadro) {
   const permitirSoltar = (evento: DragEvent) => evento.preventDefault();
 
@@ -48,6 +59,15 @@ export function ColunaQuadro({
           <h2>{lista.title}</h2>
           <span>{lista.cards.length}</span>
         </div>
+        <MenuLista
+          aoExcluir={() => aoExcluirLista(lista.id)}
+          aoSalvar={(titulo) => aoRenomearLista(lista.id, titulo)}
+          erro={erroLista}
+          excluindo={excluindoLista}
+          quantidadeCartoes={lista.cards.length}
+          salvando={salvandoLista}
+          titulo={lista.title}
+        />
       </header>
 
       <div className="cartoes-coluna">
