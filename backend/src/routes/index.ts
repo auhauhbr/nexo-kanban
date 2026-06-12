@@ -3,12 +3,14 @@ import { Router } from "express";
 import { prisma } from "../config/prisma.js";
 import { authRoutes } from "../modules/auth/auth.routes.js";
 import { boardsRoutes } from "../modules/boards/boards.routes.js";
+import { cardsRoutes } from "../modules/cards/cards.routes.js";
 import { listsRoutes } from "../modules/lists/lists.routes.js";
 
 export const routes = Router();
 
 routes.use("/auth", authRoutes);
 routes.use("/boards", boardsRoutes);
+routes.use("/cards", cardsRoutes);
 routes.use("/lists", listsRoutes);
 
 routes.get("/health", async (_request, response) => {

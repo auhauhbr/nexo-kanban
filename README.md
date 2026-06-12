@@ -66,3 +66,6 @@ npm run db:studio --workspace backend
 - `POST /boards/:boardId/lists`: cria uma lista no final do quadro
 - `PATCH /lists/:id`: atualiza titulo ou posicao de uma lista
 - `DELETE /lists/:id`: remove uma lista
+- `POST /lists/:listId/cards`: cria um cartao no final da lista
+- `PATCH /cards/:id`: atualiza ou move um cartao
+- `DELETE /cards/:id`: remove um cartao
