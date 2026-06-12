@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --configLoader runner",
     "build": "tsc --noEmit -p tsconfig.app.json && vite build --configLoader runner",
+    "test": "tsx --test src/testes/*.teste.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5"
   }
