@@ -1,4 +1,4 @@
-import { AlignLeft, X } from "lucide-react";
+import { AlignLeft, Trash2, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import type { Cartao } from "../tipos";
@@ -7,8 +7,11 @@ interface PropriedadesModalEditarCartao {
   cartao: Cartao;
   nomeLista: string;
   salvando: boolean;
+  excluindo: boolean;
   erro: string;
+  erroExclusao: string;
   aoFechar: () => void;
+  aoExcluir: () => Promise<unknown>;
   aoSalvar: (titulo: string, descricao: string | null) => Promise<unknown>;
 }
 
@@ -16,23 +19,28 @@ export function ModalEditarCartao({
   cartao,
   nomeLista,
   salvando,
+  excluindo,
   erro,
+  erroExclusao,
   aoFechar,
+  aoExcluir,
   aoSalvar
 }: PropriedadesModalEditarCartao) {
   const [titulo, definirTitulo] = useState(cartao.title);
   const [descricao, definirDescricao] = useState(cartao.description ?? "");
+  const [confirmandoExclusao, definirConfirmandoExclusao] = useState(false);
+  const ocupado = salvando || excluindo;
 
   useEffect(() => {
     const fecharComEscape = (evento: KeyboardEvent) => {
-      if (evento.key === "Escape" && !salvando) {
+      if (evento.key === "Escape" && !ocupado) {
         aoFechar();
       }
     };
 
     window.addEventListener("keydown", fecharComEscape);
     return () => window.removeEventListener("keydown", fecharComEscape);
-  }, [aoFechar, salvando]);
+  }, [aoFechar, ocupado]);
 
   const enviarFormulario = async (evento: FormEvent) => {
     evento.preventDefault();
@@ -43,6 +51,15 @@ export function ModalEditarCartao({
 
     try {
       await aoSalvar(titulo.trim(), descricao.trim() || null);
+      aoFechar();
+    } catch {
+      // A mensagem da mutação permanece visível no modal.
+    }
+  };
+
+  const excluir = async () => {
+    try {
+      await aoExcluir();
       aoFechar();
     } catch {
       // A mensagem da mutação permanece visível no modal.
@@ -64,7 +81,7 @@ export function ModalEditarCartao({
           </div>
           <button
             aria-label="Fechar edição"
-            disabled={salvando}
+            disabled={ocupado}
             onClick={aoFechar}
             type="button"
           >
@@ -100,14 +117,45 @@ export function ModalEditarCartao({
         </label>
 
         {erro ? <p className="erro-modal-cartao">{erro}</p> : null}
+        {erroExclusao ? (
+          <p className="erro-modal-cartao">{erroExclusao}</p>
+        ) : null}
 
         <footer>
-          <button disabled={salvando} onClick={aoFechar} type="button">
-            Cancelar
-          </button>
-          <button disabled={salvando || !titulo.trim()} type="submit">
-            {salvando ? "Salvando..." : "Salvar alterações"}
-          </button>
+          {confirmandoExclusao ? (
+            <div className="confirmacao-exclusao-cartao">
+              <p>Excluir este cartão permanentemente?</p>
+              <button
+                disabled={ocupado}
+                onClick={() => definirConfirmandoExclusao(false)}
+                type="button"
+              >
+                Manter cartão
+              </button>
+              <button disabled={ocupado} onClick={excluir} type="button">
+                {excluindo ? "Excluindo..." : "Excluir cartão"}
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                className="botao-excluir-cartao"
+                disabled={ocupado}
+                onClick={() => definirConfirmandoExclusao(true)}
+                type="button"
+              >
+                <Trash2 size={14} />
+                Excluir
+              </button>
+              <span />
+              <button disabled={ocupado} onClick={aoFechar} type="button">
+                Cancelar
+              </button>
+              <button disabled={ocupado || !titulo.trim()} type="submit">
+                {salvando ? "Salvando..." : "Salvar alterações"}
+              </button>
+            </>
+          )}
         </footer>
       </form>
     </div>

@@ -1152,6 +1152,7 @@ a {
 
 .modal-cartao footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   padding-top: 19px;
@@ -1173,9 +1174,41 @@ a {
   background: #edf1f6;
 }
 
-.modal-cartao footer button:last-child {
+.modal-cartao footer > span {
+  flex: 1;
+}
+
+.modal-cartao footer > button:last-child {
   color: #fff;
   background: var(--blue);
+}
+
+.modal-cartao footer .botao-excluir-cartao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #b42318;
+  background: #fff0ef;
+}
+
+.confirmacao-exclusao-cartao {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirmacao-exclusao-cartao p {
+  margin: 0;
+  color: #9f2017;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.confirmacao-exclusao-cartao button:last-child {
+  color: #fff;
+  background: #d92d20;
 }
 
 .modal-cartao button:disabled {
@@ -1408,5 +1441,18 @@ a {
 
   .modal-cartao footer button {
     width: 100%;
+  }
+
+  .modal-cartao footer > span {
+    display: none;
+  }
+
+  .confirmacao-exclusao-cartao {
+    grid-template-columns: 1fr;
+  }
+
+  .confirmacao-exclusao-cartao p {
+    margin-bottom: 4px;
+    text-align: center;
   }
 }
