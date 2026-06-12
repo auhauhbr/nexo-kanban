@@ -52,6 +52,12 @@ Abra o Prisma Studio para visualizar os dados:
 npm run db:studio --workspace backend
 ```
 
+Execute os testes automatizados:
+
+```bash
+npm test
+```
+
 ## Endpoints atuais
 
 - `GET /health`: confirma que a API e o PostgreSQL estao online
