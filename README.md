@@ -1,6 +1,6 @@
-# Kanban Projeto
+# Projeto Kanban
 
-Aplicacao full stack de gestao de tarefas com quadros, listas, cartoes, drag-and-drop e atualizacoes em tempo real.
+Aplicação full stack de gestão de tarefas com quadros, listas, cartões, arrastar e soltar e atualizações em tempo real.
 
 ## Stack planejada
 
@@ -16,7 +16,7 @@ Aplicacao full stack de gestao de tarefas com quadros, listas, cartoes, drag-and
 
 ## Primeiros comandos
 
-Instale as dependencias:
+Instale as dependências:
 
 ```bash
 npm install
@@ -66,25 +66,31 @@ npm test
 
 ## Endpoints atuais
 
-- `GET /health`: confirma que a API e o PostgreSQL estao online
+- `GET /health`: confirma que a API e o PostgreSQL estão online
 - `POST /auth/register`: cria uma conta e retorna um JWT
 - `POST /auth/login`: autentica uma conta e retorna um JWT
-- `GET /auth/me`: retorna o usuario autenticado
-- `GET /boards`: lista os quadros do usuario
+- `GET /auth/me`: retorna o usuário autenticado
+- `GET /boards`: lista os quadros do usuário
 - `POST /boards`: cria um quadro
-- `GET /boards/:id`: retorna um quadro com listas e cartoes
+- `GET /boards/:id`: retorna um quadro com listas e cartões
 - `PATCH /boards/:id`: atualiza um quadro
 - `DELETE /boards/:id`: remove um quadro
 - `POST /boards/:boardId/lists`: cria uma lista no final do quadro
-- `PATCH /lists/:id`: atualiza titulo ou posicao de uma lista
+- `PATCH /lists/:id`: atualiza título ou posição de uma lista
 - `DELETE /lists/:id`: remove uma lista
-- `POST /lists/:listId/cards`: cria um cartao no final da lista
-- `PATCH /cards/:id`: atualiza ou move um cartao
-- `DELETE /cards/:id`: remove um cartao
+- `POST /lists/:listId/cards`: cria um cartão no final da lista
+- `PATCH /cards/:id`: atualiza ou move um cartão
+- `DELETE /cards/:id`: remove um cartão
 
 ## Eventos em tempo real
 
-- A conexao Socket.io exige o JWT em `auth.token`
-- `join-board`: entra com seguranca na sala de um quadro
-- `board:updated`: solicita a sincronizacao dos dados do quadro
-- Eventos especificos: `board:changed`, `board:deleted`, `list:created`, `list:updated`, `list:deleted`, `card:created`, `card:updated` e `card:deleted`
+- A conexão Socket.io exige o JWT em `auth.token`
+- `join-board`: entra com segurança na sala de um quadro
+- `board:updated`: solicita a sincronização dos dados do quadro
+- Eventos específicos: `board:changed`, `board:deleted`, `list:created`, `list:updated`, `list:deleted`, `card:created`, `card:updated` e `card:deleted`
+
+## Convenção de nomes
+
+Pastas, arquivos, funções, variáveis e mensagens próprias do projeto são escritos em português sempre que isso deixa o código claro.
+
+Contratos externos permanecem no formato esperado pelas ferramentas e integrações. Isso inclui rotas como `/boards`, campos da API e do Prisma como `boardId` e métodos de bibliotecas como `$transaction`.
