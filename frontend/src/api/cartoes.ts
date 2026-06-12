@@ -57,3 +57,7 @@ export const moverCartao = async ({
   );
   return resposta.card;
 };
+
+export const excluirCartao = async (idCartao: string) => {
+  await api.delete(`/cards/${idCartao}`);
+};
