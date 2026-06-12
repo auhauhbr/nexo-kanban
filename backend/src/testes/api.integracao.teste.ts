@@ -227,10 +227,52 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
 
   const moved = await patch(
     `/cards/${secondCardId}`,
-    { listId: doneId, position: 0, description: "Completed" },
+    {
+      listId: doneId,
+      position: 0,
+      description: "Completed",
+      dueDate: "2026-06-20T12:00:00.000Z"
+    },
     owner.token
   );
   assert.equal(moved.resposta.status, 200);
+
+  const createdLabel = await post(
+    `/boards/${boardId}/labels`,
+    { name: "Prioridade", color: "#ff6b4a" },
+    owner.token
+  );
+  assert.equal(createdLabel.resposta.status, 201);
+  const labelId = (createdLabel.body.label as JsonObject).id as string;
+
+  const linkedLabel = await post(
+    `/cards/${secondCardId}/labels/${labelId}`,
+    {},
+    owner.token
+  );
+  assert.equal(linkedLabel.resposta.status, 204);
+
+  const createdChecklist = await post(
+    `/cards/${secondCardId}/checklists`,
+    { title: "Publicação" },
+    owner.token
+  );
+  assert.equal(createdChecklist.resposta.status, 201);
+  const checklistId = (createdChecklist.body.checklist as JsonObject).id as string;
+
+  const createdItem = await post(
+    `/checklists/${checklistId}/items`,
+    { text: "Revisar entrega" },
+    owner.token
+  );
+  assert.equal(createdItem.resposta.status, 201);
+  const itemId = (createdItem.body.item as JsonObject).id as string;
+  const completedItem = await patch(
+    `/checklist-items/${itemId}`,
+    { done: true },
+    owner.token
+  );
+  assert.equal(completedItem.resposta.status, 200);
 
   const otherCardAccess = await patch(
     `/cards/${firstCardId}`,
@@ -263,6 +305,12 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
     ]),
     [["Second", 0]]
   );
+  const cartaoComRecursos = (lists[1]?.cards as JsonObject[])[0] as JsonObject;
+  assert.equal(cartaoComRecursos.dueDate, "2026-06-20T12:00:00.000Z");
+  assert.equal(((cartaoComRecursos.labels as JsonObject[])[0]?.name), "Prioridade");
+  const checklist = (cartaoComRecursos.checklists as JsonObject[])[0] as JsonObject;
+  assert.equal(checklist.title, "Publicação");
+  assert.equal(((checklist.items as JsonObject[])[0]?.done), true);
 
   const deletedCard = await remove(`/cards/${firstCardId}`, owner.token);
   assert.equal(deletedCard.resposta.status, 204);

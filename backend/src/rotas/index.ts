@@ -5,6 +5,8 @@ import { rotasAutenticacao } from "../modulos/autenticacao/autenticacao.rotas.js
 import { rotasQuadros } from "../modulos/quadros/quadros.rotas.js";
 import { rotasCartoes } from "../modulos/cartoes/cartoes.rotas.js";
 import { rotasListas } from "../modulos/listas/listas.rotas.js";
+import { rotasEtiquetas } from "../modulos/etiquetas/etiquetas.rotas.js";
+import { rotasChecklists } from "../modulos/checklists/checklists.rotas.js";
 
 export const rotas = Router();
 
@@ -12,6 +14,8 @@ rotas.use("/auth", rotasAutenticacao);
 rotas.use("/boards", rotasQuadros);
 rotas.use("/cards", rotasCartoes);
 rotas.use("/lists", rotasListas);
+rotas.use(rotasEtiquetas);
+rotas.use(rotasChecklists);
 
 rotas.get("/health", async (_requisicao, resposta) => {
   try {

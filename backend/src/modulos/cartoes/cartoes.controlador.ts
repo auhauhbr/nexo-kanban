@@ -34,6 +34,13 @@ export const controladorAtualizarCartao: RequestHandler = async (
     esquemaAtualizarCartao.parse(requisicao.body)
   );
   emitirEventoDoQuadro(idQuadro, "card:updated", { card: cartao });
+  if (
+    cartao.dueDate &&
+    cartao.dueDate.getTime() > Date.now() &&
+    cartao.dueDate.getTime() - Date.now() <= 24 * 60 * 60 * 1000
+  ) {
+    emitirEventoDoQuadro(idQuadro, "card:due-soon", { card: cartao });
+  }
   resposta.status(200).json({ card: cartao });
 };
 
