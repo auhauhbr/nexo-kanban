@@ -38,3 +38,22 @@ export const atualizarCartao = async ({
   );
   return resposta.card;
 };
+
+export const moverCartao = async ({
+  idCartao,
+  idLista,
+  posicao
+}: {
+  idCartao: string;
+  idLista: string;
+  posicao: number;
+}) => {
+  const { data: resposta } = await api.patch<{ card: Cartao }>(
+    `/cards/${idCartao}`,
+    {
+      listId: idLista,
+      position: posicao
+    }
+  );
+  return resposta.card;
+};
