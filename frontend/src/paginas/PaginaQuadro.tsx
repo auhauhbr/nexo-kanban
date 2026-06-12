@@ -2,7 +2,7 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Columns3 } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import * as apiCartoes from "../api/cartoes";
 import * as apiListas from "../api/listas";
@@ -10,6 +10,7 @@ import * as apiQuadros from "../api/quadros";
 import { ColunaQuadro } from "../componentes/ColunaQuadro";
 import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
+import { MenuQuadro } from "../componentes/MenuQuadro";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
 import type { Cartao, Quadro } from "../tipos";
 import {
@@ -23,6 +24,7 @@ import {
 
 export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
+  const navegar = useNavigate();
   const clienteConsultas = useQueryClient();
   const chaveConsultaQuadro = ["quadro", idQuadro];
   const [cartaoSelecionado, definirCartaoSelecionado] = useState<{
@@ -39,6 +41,20 @@ export function PaginaQuadro() {
     queryKey: chaveConsultaQuadro,
     queryFn: () => apiQuadros.buscarQuadro(idQuadro),
     enabled: Boolean(idQuadro)
+  });
+  const edicaoQuadro = useMutation({
+    mutationFn: apiQuadros.atualizarTituloQuadro,
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      clienteConsultas.invalidateQueries({ queryKey: ["quadros"] });
+    }
+  });
+  const exclusaoQuadro = useMutation({
+    mutationFn: apiQuadros.excluirQuadro,
+    onSuccess: async () => {
+      await clienteConsultas.invalidateQueries({ queryKey: ["quadros"] });
+      navegar("/");
+    }
   });
   const criacaoLista = useMutation({
     mutationFn: (titulo: string) => apiListas.criarLista({ idQuadro, titulo }),
@@ -138,6 +154,14 @@ export function PaginaQuadro() {
         "Não foi possível criar a lista.")
       : "Não foi possível criar a lista."
     : "";
+  const mensagemErroQuadro =
+    edicaoQuadro.error || exclusaoQuadro.error
+      ? axios.isAxiosError(edicaoQuadro.error ?? exclusaoQuadro.error)
+        ? ((edicaoQuadro.error ?? exclusaoQuadro.error) as {
+            response?: { data?: { message?: string } };
+          }).response?.data?.message ?? "Não foi possível atualizar o quadro."
+        : "Não foi possível atualizar o quadro."
+      : "";
   const mensagemErroLista =
     edicaoLista.error || exclusaoLista.error
       ? axios.isAxiosError(edicaoLista.error ?? exclusaoLista.error)
@@ -225,6 +249,17 @@ export function PaginaQuadro() {
               {quadro.lists.length === 1 ? "lista" : "listas"}
             </p>
           </div>
+          <MenuQuadro
+            aoExcluir={() => exclusaoQuadro.mutateAsync(idQuadro)}
+            aoSalvar={(titulo) =>
+              edicaoQuadro.mutateAsync({ idQuadro, titulo })
+            }
+            erro={mensagemErroQuadro}
+            excluindo={exclusaoQuadro.isPending}
+            quantidadeListas={quadro.lists.length}
+            salvando={edicaoQuadro.isPending}
+            titulo={quadro.title}
+          />
         </div>
         {movimentacaoCartao.isError || movimentacaoLista.isError ? (
           <p className="erro-movimentacao">
