@@ -26,7 +26,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -906,6 +907,102 @@ a {
   color: #8a96a8;
   font-size: 10px;
   text-align: center;
+}
+
+.botao-adicionar-cartao {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 8px;
+  color: #647187;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.botao-adicionar-cartao:hover {
+  color: #32415a;
+  background: #e9eef5;
+}
+
+.formulario-novo-cartao {
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid #dce3ed;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(27, 45, 75, 0.08);
+}
+
+.formulario-novo-cartao input,
+.formulario-novo-cartao textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #d2dae6;
+  border-radius: 7px;
+  outline: none;
+  color: #273348;
+  background: #fff;
+  font-size: 10px;
+}
+
+.formulario-novo-cartao textarea {
+  margin-top: 7px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.formulario-novo-cartao input:focus,
+.formulario-novo-cartao textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.1);
+}
+
+.formulario-novo-cartao div {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.formulario-novo-cartao button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.formulario-novo-cartao button:first-child {
+  flex: 1;
+  color: #fff;
+  background: var(--blue);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.formulario-novo-cartao button:last-child {
+  display: grid;
+  width: 34px;
+  place-items: center;
+  color: #677489;
+  background: #eef2f7;
+}
+
+.formulario-novo-cartao button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.formulario-novo-cartao p {
+  margin: 8px 1px 0;
+  color: #b42318;
+  font-size: 9px;
+  line-height: 1.5;
 }
 
 .botao-adicionar-lista {

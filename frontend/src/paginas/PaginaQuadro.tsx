@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Columns3 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
+import * as apiCartoes from "../api/cartoes";
 import * as apiListas from "../api/listas";
 import * as apiQuadros from "../api/quadros";
 import { ColunaQuadro } from "../componentes/ColunaQuadro";
@@ -23,11 +24,22 @@ export function PaginaQuadro() {
     onSuccess: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
+  const criacaoCartao = useMutation({
+    mutationFn: apiCartoes.criarCartao,
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
   const mensagemErroCriacao = criacaoLista.error
     ? axios.isAxiosError(criacaoLista.error)
       ? (criacaoLista.error.response?.data?.message ??
         "Não foi possível criar a lista.")
       : "Não foi possível criar a lista."
+    : "";
+  const mensagemErroCartao = criacaoCartao.error
+    ? axios.isAxiosError(criacaoCartao.error)
+      ? (criacaoCartao.error.response?.data?.message ??
+        "Não foi possível criar o cartão.")
+      : "Não foi possível criar o cartão."
     : "";
 
   if (consultaQuadro.isPending) {
@@ -72,7 +84,22 @@ export function PaginaQuadro() {
 
       <section className="area-listas">
         {quadro.lists.map((lista) => (
-          <ColunaQuadro key={lista.id} lista={lista} />
+          <ColunaQuadro
+            aoCriarCartao={(idLista, titulo, descricao) =>
+              criacaoCartao.mutateAsync({ idLista, titulo, descricao })
+            }
+            criandoCartao={
+              criacaoCartao.isPending &&
+              criacaoCartao.variables?.idLista === lista.id
+            }
+            erroCriacaoCartao={
+              criacaoCartao.variables?.idLista === lista.id
+                ? mensagemErroCartao
+                : ""
+            }
+            key={lista.id}
+            lista={lista}
+          />
         ))}
         <FormularioNovaLista
           aoCriar={(titulo) => criacaoLista.mutateAsync(titulo)}
