@@ -16,6 +16,10 @@ import {
   moverCartaoNoQuadro,
   type MovimentoCartao
 } from "../utilitarios/mover-cartao";
+import {
+  moverListaNoQuadro,
+  type MovimentoLista
+} from "../utilitarios/mover-lista";
 
 export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
@@ -26,6 +30,9 @@ export function PaginaQuadro() {
     nomeLista: string;
   } | null>(null);
   const [idCartaoArrastado, definirIdCartaoArrastado] = useState<string | null>(
+    null
+  );
+  const [idListaArrastada, definirIdListaArrastada] = useState<string | null>(
     null
   );
   const consultaQuadro = useQuery({
@@ -46,6 +53,35 @@ export function PaginaQuadro() {
   const exclusaoLista = useMutation({
     mutationFn: apiListas.excluirLista,
     onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
+  const movimentacaoLista = useMutation({
+    mutationFn: ({ idLista, posicaoDestino }: MovimentoLista) =>
+      apiListas.moverLista({ idLista, posicao: posicaoDestino }),
+    onMutate: async (movimento) => {
+      await clienteConsultas.cancelQueries({ queryKey: chaveConsultaQuadro });
+      const quadroAnterior = clienteConsultas.getQueryData<Quadro>(
+        chaveConsultaQuadro
+      );
+
+      if (quadroAnterior) {
+        clienteConsultas.setQueryData(
+          chaveConsultaQuadro,
+          moverListaNoQuadro(quadroAnterior, movimento)
+        );
+      }
+
+      return { quadroAnterior };
+    },
+    onError: (_erro, _movimento, contexto) => {
+      if (contexto?.quadroAnterior) {
+        clienteConsultas.setQueryData(
+          chaveConsultaQuadro,
+          contexto.quadroAnterior
+        );
+      }
+    },
+    onSettled: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
   const criacaoCartao = useMutation({
@@ -155,6 +191,17 @@ export function PaginaQuadro() {
     });
     definirIdCartaoArrastado(null);
   };
+  const soltarLista = (posicaoDestino: number) => {
+    if (!idListaArrastada || movimentacaoLista.isPending) {
+      return;
+    }
+
+    movimentacaoLista.mutate({
+      idLista: idListaArrastada,
+      posicaoDestino
+    });
+    definirIdListaArrastada(null);
+  };
 
   return (
     <main className="pagina-quadro">
@@ -179,9 +226,10 @@ export function PaginaQuadro() {
             </p>
           </div>
         </div>
-        {movimentacaoCartao.isError ? (
+        {movimentacaoCartao.isError || movimentacaoLista.isError ? (
           <p className="erro-movimentacao">
-            Não foi possível mover o cartão. A posição anterior foi restaurada.
+            Não foi possível concluir a movimentação. A posição anterior foi
+            restaurada.
           </p>
         ) : null}
       </section>
@@ -196,12 +244,15 @@ export function PaginaQuadro() {
               definirCartaoSelecionado({ cartao, nomeLista })
             }
             aoFinalizarArraste={() => definirIdCartaoArrastado(null)}
+            aoFinalizarArrasteLista={() => definirIdListaArrastada(null)}
             aoIniciarArraste={definirIdCartaoArrastado}
+            aoIniciarArrasteLista={definirIdListaArrastada}
             aoExcluirLista={(idLista) => exclusaoLista.mutateAsync(idLista)}
             aoRenomearLista={(idLista, titulo) =>
               edicaoLista.mutateAsync({ idLista, titulo })
             }
             aoSoltarCartao={soltarCartao}
+            aoSoltarLista={soltarLista}
             criandoCartao={
               criacaoCartao.isPending &&
               criacaoCartao.variables?.idLista === lista.id
@@ -223,6 +274,7 @@ export function PaginaQuadro() {
             key={lista.id}
             lista={lista}
             idCartaoArrastado={idCartaoArrastado}
+            idListaArrastada={idListaArrastada}
             salvandoLista={
               edicaoLista.isPending && edicaoLista.variables?.idLista === lista.id
             }
