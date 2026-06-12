@@ -120,7 +120,8 @@ export const atualizarLista = async (
       data: {
         title: entrada.title,
         position: posicao,
-        archived: entrada.archived
+        archived: entrada.archived,
+        wipLimit: entrada.wipLimit
       },
       include: {
         cards: {

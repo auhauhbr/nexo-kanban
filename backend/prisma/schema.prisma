@@ -42,6 +42,7 @@ model List {
   board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   cards     Card[]
   archived  Boolean  @default(false)
+  wipLimit  Int?
 
   @@index([boardId, position])
 }
