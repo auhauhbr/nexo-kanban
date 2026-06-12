@@ -48,6 +48,11 @@ export function PaginaQuadro() {
     onSuccess: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
+  const exclusaoCartao = useMutation({
+    mutationFn: apiCartoes.excluirCartao,
+    onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
   const movimentacaoCartao = useMutation({
     mutationFn: ({ idCartao, idListaDestino, posicaoDestino }: MovimentoCartao) =>
       apiCartoes.moverCartao({
@@ -98,6 +103,12 @@ export function PaginaQuadro() {
       ? (edicaoCartao.error.response?.data?.message ??
         "Não foi possível salvar o cartão.")
       : "Não foi possível salvar o cartão."
+    : "";
+  const mensagemErroExclusao = exclusaoCartao.error
+    ? axios.isAxiosError(exclusaoCartao.error)
+      ? (exclusaoCartao.error.response?.data?.message ??
+        "Não foi possível excluir o cartão.")
+      : "Não foi possível excluir o cartão."
     : "";
 
   if (consultaQuadro.isPending) {
@@ -193,6 +204,9 @@ export function PaginaQuadro() {
       {cartaoSelecionado ? (
         <ModalEditarCartao
           aoFechar={() => definirCartaoSelecionado(null)}
+          aoExcluir={() =>
+            exclusaoCartao.mutateAsync(cartaoSelecionado.cartao.id)
+          }
           aoSalvar={(titulo, descricao) =>
             edicaoCartao.mutateAsync({
               idCartao: cartaoSelecionado.cartao.id,
@@ -202,6 +216,8 @@ export function PaginaQuadro() {
           }
           cartao={cartaoSelecionado.cartao}
           erro={mensagemErroEdicao}
+          erroExclusao={mensagemErroExclusao}
+          excluindo={exclusaoCartao.isPending}
           nomeLista={cartaoSelecionado.nomeLista}
           salvando={edicaoCartao.isPending}
         />
