@@ -21,3 +21,27 @@ export interface ResumoQuadro {
     lists: number;
   };
 }
+
+export interface Cartao {
+  id: string;
+  title: string;
+  description: string | null;
+  position: number;
+  listId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Lista {
+  id: string;
+  title: string;
+  position: number;
+  boardId: string;
+  createdAt: string;
+  updatedAt: string;
+  cards: Cartao[];
+}
+
+export interface Quadro extends Omit<ResumoQuadro, "_count"> {
+  lists: Lista[];
+}
