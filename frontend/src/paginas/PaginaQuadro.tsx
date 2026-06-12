@@ -12,6 +12,7 @@ import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
 import { MenuQuadro } from "../componentes/MenuQuadro";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
+import { usarTempoRealQuadro } from "../hooks/usarTempoRealQuadro";
 import type { Cartao, Quadro } from "../tipos";
 import {
   moverCartaoNoQuadro,
@@ -22,11 +23,19 @@ import {
   type MovimentoLista
 } from "../utilitarios/mover-lista";
 
+const rotulosTempoReal = {
+  conectado: "Tempo real ativo",
+  conectando: "Conectando...",
+  desconectado: "Tempo real pausado",
+  erro: "Tempo real indisponível"
+};
+
 export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
   const navegar = useNavigate();
   const clienteConsultas = useQueryClient();
   const chaveConsultaQuadro = ["quadro", idQuadro];
+  const estadoTempoReal = usarTempoRealQuadro(idQuadro);
   const [cartaoSelecionado, definirCartaoSelecionado] = useState<{
     cartao: Cartao;
     nomeLista: string;
@@ -260,6 +269,13 @@ export function PaginaQuadro() {
             salvando={edicaoQuadro.isPending}
             titulo={quadro.title}
           />
+          <span
+            className={`estado-tempo-real estado-tempo-real-${estadoTempoReal}`}
+            title={`Tempo real: ${estadoTempoReal}`}
+          >
+            <i />
+            {rotulosTempoReal[estadoTempoReal]}
+          </span>
         </div>
         {movimentacaoCartao.isError || movimentacaoLista.isError ? (
           <p className="erro-movimentacao">
