@@ -1,0 +1,59 @@
+name: Publicar frontend no GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    env:
+      VITE_BASE_PATH: /nexo-kanban/
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+      VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL }}
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validar endereço da API
+        run: |
+          if [ -z "$VITE_API_URL" ] || [ -z "$VITE_SOCKET_URL" ]; then
+            echo "Defina VITE_API_URL e VITE_SOCKET_URL nas variáveis do repositório."
+            exit 1
+          fi
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar frontend
+        run: npm run build --workspace frontend
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar artefato
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4
