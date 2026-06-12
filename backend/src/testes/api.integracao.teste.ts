@@ -214,6 +214,8 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
   );
   assert.equal(firstCard.resposta.status, 201);
   assert.equal(secondCard.resposta.status, 201);
+  assert.equal((firstCard.body.card as JsonObject).number, 1);
+  assert.equal((secondCard.body.card as JsonObject).number, 2);
 
   const firstCardId = (firstCard.body.card as JsonObject).id as string;
   const secondCardId = (secondCard.body.card as JsonObject).id as string;
@@ -231,7 +233,8 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
       listId: doneId,
       position: 0,
       description: "Completed",
-      dueDate: "2026-06-20T12:00:00.000Z"
+      dueDate: "2026-06-20T12:00:00.000Z",
+      coverColor: "#165dff"
     },
     owner.token
   );
@@ -274,6 +277,20 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
   );
   assert.equal(completedItem.resposta.status, 200);
 
+  const comment = await post(
+    `/cards/${secondCardId}/activities`,
+    { message: "Entrega revisada pelo time." },
+    owner.token
+  );
+  assert.equal(comment.resposta.status, 201);
+
+  const attachment = await post(
+    `/cards/${secondCardId}/attachments`,
+    { title: "Protótipo", url: "https://example.com/prototipo" },
+    owner.token
+  );
+  assert.equal(attachment.resposta.status, 201);
+
   const otherCardAccess = await patch(
     `/cards/${firstCardId}`,
     { title: "Unauthorized" },
@@ -307,10 +324,33 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
   );
   const cartaoComRecursos = (lists[1]?.cards as JsonObject[])[0] as JsonObject;
   assert.equal(cartaoComRecursos.dueDate, "2026-06-20T12:00:00.000Z");
+  assert.equal(cartaoComRecursos.coverColor, "#165dff");
   assert.equal(((cartaoComRecursos.labels as JsonObject[])[0]?.name), "Prioridade");
+  assert.equal(
+    ((cartaoComRecursos.attachments as JsonObject[])[0]?.title),
+    "Protótipo"
+  );
+  assert.equal(
+    (cartaoComRecursos.activities as JsonObject[]).some(
+      (atividade) => atividade.type === "comment"
+    ),
+    true
+  );
   const checklist = (cartaoComRecursos.checklists as JsonObject[])[0] as JsonObject;
   assert.equal(checklist.title, "Publicação");
   assert.equal(((checklist.items as JsonObject[])[0]?.done), true);
+
+  const archivedCard = await patch(
+    `/cards/${firstCardId}`,
+    { archived: true },
+    owner.token
+  );
+  assert.equal(archivedCard.resposta.status, 200);
+
+  const detailAfterArchive = await get(`/boards/${boardId}`, owner.token);
+  const listsAfterArchive = (detailAfterArchive.body.board as JsonObject)
+    .lists as JsonObject[];
+  assert.deepEqual((listsAfterArchive[0]?.cards as JsonObject[]), []);
 
   const deletedCard = await remove(`/cards/${firstCardId}`, owner.token);
   assert.equal(deletedCard.resposta.status, 204);
