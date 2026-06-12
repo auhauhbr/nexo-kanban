@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 backend/src/generated/prisma/
+*.tsbuildinfo
 
 .env
 .env.*
