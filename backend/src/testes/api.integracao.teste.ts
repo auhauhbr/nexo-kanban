@@ -143,6 +143,15 @@ test("autenticação cadastra, conecta e protege a rota do usuário atual", asyn
   const health = await get("/health");
   assert.equal(health.resposta.status, 200);
   assert.equal(health.body.status, "ok");
+  assert.equal(health.resposta.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(health.resposta.headers.get("x-frame-options"), "DENY");
+
+  const weakPassword = await post("/auth/register", {
+    name: "Weak Password",
+    email: `${prefixoEmail}-weak@example.com`,
+    password: "somenteletras"
+  });
+  assert.equal(weakPassword.resposta.status, 400);
 
   const user = await registerUser("Auth Integration", "auth");
 

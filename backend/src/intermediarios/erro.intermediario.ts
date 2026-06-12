@@ -9,6 +9,18 @@ export const intermediarioDeErros: ErrorRequestHandler = (
   resposta,
   _proximo
 ) => {
+  if (
+    typeof erro === "object" &&
+    erro !== null &&
+    "type" in erro &&
+    erro.type === "entity.too.large"
+  ) {
+    resposta.status(413).json({
+      message: "A requisição excede o tamanho máximo permitido"
+    });
+    return;
+  }
+
   if (erro instanceof ErroAplicacao) {
     resposta.status(erro.statusCode).json({
       message: erro.message

@@ -25,4 +25,12 @@ if (!ambienteValidado.success) {
   process.exit(1);
 }
 
+if (
+  ambienteValidado.data.NODE_ENV === "production" &&
+  !process.env.JWT_SECRET
+) {
+  console.error("JWT_SECRET é obrigatório em ambiente de produção.");
+  process.exit(1);
+}
+
 export const ambiente = ambienteValidado.data;
