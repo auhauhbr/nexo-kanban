@@ -1,5 +1,4 @@
-import axios from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Columns3 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -22,6 +21,7 @@ import {
   moverListaNoQuadro,
   type MovimentoLista
 } from "../utilitarios/mover-lista";
+import { obterMensagemErro } from "../utilitarios/mensagem-erro";
 
 const rotulosTempoReal = {
   conectado: "Tempo real ativo",
@@ -158,44 +158,33 @@ export function PaginaQuadro() {
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
   const mensagemErroCriacao = criacaoLista.error
-    ? axios.isAxiosError(criacaoLista.error)
-      ? (criacaoLista.error.response?.data?.message ??
-        "Não foi possível criar a lista.")
-      : "Não foi possível criar a lista."
+    ? obterMensagemErro(criacaoLista.error, "Não foi possível criar a lista.")
     : "";
   const mensagemErroQuadro =
     edicaoQuadro.error || exclusaoQuadro.error
-      ? axios.isAxiosError(edicaoQuadro.error ?? exclusaoQuadro.error)
-        ? ((edicaoQuadro.error ?? exclusaoQuadro.error) as {
-            response?: { data?: { message?: string } };
-          }).response?.data?.message ?? "Não foi possível atualizar o quadro."
-        : "Não foi possível atualizar o quadro."
+      ? obterMensagemErro(
+          edicaoQuadro.error ?? exclusaoQuadro.error,
+          "Não foi possível atualizar o quadro."
+        )
       : "";
   const mensagemErroLista =
     edicaoLista.error || exclusaoLista.error
-      ? axios.isAxiosError(edicaoLista.error ?? exclusaoLista.error)
-        ? ((edicaoLista.error ?? exclusaoLista.error) as {
-            response?: { data?: { message?: string } };
-          }).response?.data?.message ?? "Não foi possível atualizar a lista."
-        : "Não foi possível atualizar a lista."
+      ? obterMensagemErro(
+          edicaoLista.error ?? exclusaoLista.error,
+          "Não foi possível atualizar a lista."
+        )
       : "";
   const mensagemErroCartao = criacaoCartao.error
-    ? axios.isAxiosError(criacaoCartao.error)
-      ? (criacaoCartao.error.response?.data?.message ??
-        "Não foi possível criar o cartão.")
-      : "Não foi possível criar o cartão."
+    ? obterMensagemErro(criacaoCartao.error, "Não foi possível criar o cartão.")
     : "";
   const mensagemErroEdicao = edicaoCartao.error
-    ? axios.isAxiosError(edicaoCartao.error)
-      ? (edicaoCartao.error.response?.data?.message ??
-        "Não foi possível salvar o cartão.")
-      : "Não foi possível salvar o cartão."
+    ? obterMensagemErro(edicaoCartao.error, "Não foi possível salvar o cartão.")
     : "";
   const mensagemErroExclusao = exclusaoCartao.error
-    ? axios.isAxiosError(exclusaoCartao.error)
-      ? (exclusaoCartao.error.response?.data?.message ??
-        "Não foi possível excluir o cartão.")
-      : "Não foi possível excluir o cartão."
+    ? obterMensagemErro(
+        exclusaoCartao.error,
+        "Não foi possível excluir o cartão."
+      )
     : "";
 
   if (consultaQuadro.isPending) {

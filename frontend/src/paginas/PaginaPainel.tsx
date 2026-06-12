@@ -1,5 +1,4 @@
-import axios from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LayoutGrid, LogOut } from "lucide-react";
 
 import * as apiQuadros from "../api/quadros";
@@ -7,6 +6,7 @@ import { CartaoQuadro } from "../componentes/CartaoQuadro";
 import { FormularioNovoQuadro } from "../componentes/FormularioNovoQuadro";
 import { Marca } from "../componentes/Marca";
 import { usarAutenticacao } from "../contexto/ContextoAutenticacao";
+import { obterMensagemErro } from "../utilitarios/mensagem-erro";
 
 const chaveConsultaQuadros = ["quadros"];
 
@@ -24,10 +24,7 @@ export function PaginaPainel() {
   });
 
   const mensagemErroCriacao = criacaoQuadro.error
-    ? axios.isAxiosError(criacaoQuadro.error)
-      ? (criacaoQuadro.error.response?.data?.message ??
-        "Não foi possível criar o quadro.")
-      : "Não foi possível criar o quadro."
+    ? obterMensagemErro(criacaoQuadro.error, "Não foi possível criar o quadro.")
     : "";
 
   return (

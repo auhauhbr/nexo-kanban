@@ -1,10 +1,10 @@
-﻿import axios from "axios";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+﻿import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import { LayoutAutenticacao } from "../componentes/LayoutAutenticacao";
 import { usarAutenticacao } from "../contexto/ContextoAutenticacao";
+import { obterMensagemErro } from "../utilitarios/mensagem-erro";
 
 export function PaginaEntrar() {
   const { entrar, usuario } = usarAutenticacao();
@@ -28,11 +28,7 @@ export function PaginaEntrar() {
       await entrar(email, senha);
       navegar("/");
     } catch (erroRequisicao) {
-      definirErro(
-        axios.isAxiosError(erroRequisicao)
-          ? (erroRequisicao.response?.data?.message ?? "Não foi possível entrar.")
-          : "Não foi possível entrar."
-      );
+      definirErro(obterMensagemErro(erroRequisicao, "Não foi possível entrar."));
     } finally {
       definirEnviando(false);
     }
