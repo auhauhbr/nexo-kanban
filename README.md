@@ -10,14 +10,59 @@ soltar, atualização em tempo real e ambiente completo com Docker.
 - Criação, edição e exclusão de quadros
 - Criação, renomeação, reordenação e exclusão de listas
 - Criação, edição, movimentação e exclusão de cartões
+- Numeração automática de cartões dentro de cada quadro
+- Capas coloridas para destacar cartões visualmente
 - Etiquetas coloridas compartilhadas entre cartões do quadro
 - Prazos com destaque visual e alerta em tempo real quando estão próximos
 - Checklists com itens marcáveis e progresso exibido no cartão
+- Comentários e histórico automático de atividades dos cartões
+- Anexos por links externos, com acesso direto pelo cartão
+- Arquivamento de cartões e listas sem exibi-los no quadro ativo
+- Central para consultar e restaurar cartões e listas arquivados
+- Limite de trabalho em progresso (WIP limit) com alerta visual por lista
 - Arrastar e soltar cartões entre listas
 - Atualizações em tempo real com salas privadas por quadro
 - Interface responsiva com estados de carregamento, erro e notificações
 - Testes de integração da API e testes das regras de movimentação
 - Validação automática com GitHub Actions
+
+## Diferenciais atuais
+
+O Nexo não possui planos pagos ou bloqueios por assinatura. Todos os recursos
+implementados ficam disponíveis para qualquer usuário da aplicação.
+
+Além do fluxo Kanban tradicional, o projeto já oferece:
+
+- **Histórico automático de atividades:** registra criação, edição,
+  movimentação, arquivamento e anexos adicionados ao cartão.
+- **Comentários integrados ao histórico:** mensagens e alterações aparecem na
+  mesma linha do tempo do cartão.
+- **Identificação por número:** cada cartão recebe um número sequencial dentro
+  do quadro, facilitando referências como `#12`.
+- **Arquivamento separado da exclusão:** cartões e listas podem sair do quadro
+  ativo sem serem excluídos permanentemente e podem ser restaurados pela
+  Central de Arquivados.
+- **WIP limit configurável:** cada lista pode exibir um limite recomendado de
+  cartões e destacar visualmente quando o fluxo ultrapassa esse valor.
+- **Recursos visuais e operacionais liberados:** capas, etiquetas, prazos,
+  checklists, comentários, histórico e anexos por link não possuem paywall.
+
+## Roadmap de diferenciais
+
+Os recursos abaixo fazem parte da direção planejada do projeto, mas **ainda não
+estão implementados**:
+
+- **Subcards:** cartões filhos ligados a um cartão principal, cada um com seus
+  próprios dados, responsáveis e progresso. É diferente de um checklist,
+  porque o subcard continua sendo uma tarefa completa.
+- **Dependências entre cartões:** relações como “bloqueado por” e “bloqueia”,
+  permitindo identificar tarefas que não podem avançar antes de outras.
+- **Desfazer ações:** restauração da alteração anterior após mover, editar ou
+  arquivar um cartão.
+- **Upload real de arquivos:** armazenamento de imagens, PDFs e documentos. No
+  estado atual, os anexos são links externos.
+- **Colaboração entre usuários:** membros, permissões e responsáveis por
+  cartão. Atualmente, cada quadro pertence somente ao seu criador.
 
 ## Tecnologias
 
@@ -59,7 +104,7 @@ listas e cartões consistentes durante as movimentações.
 ### Banco de dados
 
 - **PostgreSQL:** armazena usuários, quadros, listas e cartões em um modelo
-  relacional.
+  relacional, além de etiquetas, checklists, atividades e anexos por link.
 - **Prisma ORM:** define o modelo de dados, gera o cliente tipado, executa
   consultas e controla as migrações do banco.
 - **Transações:** preservam a ordenação de listas e cartões durante alterações
@@ -208,15 +253,21 @@ Todas as rotas, exceto cadastro e login, exigem o cabeçalho
 | `DELETE` | `/boards/:id` | Exclui um quadro |
 | `POST` | `/boards/:boardId/lists` | Cria uma lista |
 | `PATCH` | `/lists/:id` | Atualiza ou move uma lista |
+| `PATCH` | `/lists/:id/restaurar` | Restaura uma lista arquivada |
 | `DELETE` | `/lists/:id` | Exclui uma lista |
 | `POST` | `/lists/:listId/cards` | Cria um cartão |
 | `PATCH` | `/cards/:id` | Atualiza ou move um cartão |
+| `PATCH` | `/cards/:id/restaurar` | Restaura um cartão arquivado |
 | `DELETE` | `/cards/:id` | Exclui um cartão |
 | `POST` | `/boards/:boardId/labels` | Cria uma etiqueta |
 | `POST` | `/cards/:cardId/labels/:labelId` | Vincula uma etiqueta |
 | `POST` | `/cards/:cardId/checklists` | Cria um checklist |
 | `POST` | `/checklists/:checklistId/items` | Cria um item de checklist |
 | `PATCH` | `/checklist-items/:id` | Atualiza um item de checklist |
+| `POST` | `/cards/:cardId/activities` | Adiciona um comentário ao histórico |
+| `POST` | `/cards/:cardId/attachments` | Adiciona um anexo por link |
+| `DELETE` | `/attachments/:id` | Exclui um anexo por link |
+| `GET` | `/boards/:id/archived` | Lista cartões e listas arquivados |
 | `GET` | `/health` | Verifica a API e o banco |
 
 ## Tempo real
