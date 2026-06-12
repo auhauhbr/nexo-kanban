@@ -11,9 +11,28 @@ import {
 
 export const rotasEtiquetas = Router();
 
-rotasEtiquetas.use(intermediarioDeAutenticacao);
-rotasEtiquetas.post("/boards/:boardId/labels", controladorCriarEtiqueta);
-rotasEtiquetas.patch("/labels/:id", controladorAtualizarEtiqueta);
-rotasEtiquetas.delete("/labels/:id", controladorExcluirEtiqueta);
-rotasEtiquetas.post("/cards/:cardId/labels/:labelId", controladorVincularEtiqueta);
-rotasEtiquetas.delete("/cards/:cardId/labels/:labelId", controladorDesvincularEtiqueta);
+rotasEtiquetas.post(
+  "/boards/:boardId/labels",
+  intermediarioDeAutenticacao,
+  controladorCriarEtiqueta
+);
+rotasEtiquetas.patch(
+  "/labels/:id",
+  intermediarioDeAutenticacao,
+  controladorAtualizarEtiqueta
+);
+rotasEtiquetas.delete(
+  "/labels/:id",
+  intermediarioDeAutenticacao,
+  controladorExcluirEtiqueta
+);
+rotasEtiquetas.post(
+  "/cards/:cardId/labels/:labelId",
+  intermediarioDeAutenticacao,
+  controladorVincularEtiqueta
+);
+rotasEtiquetas.delete(
+  "/cards/:cardId/labels/:labelId",
+  intermediarioDeAutenticacao,
+  controladorDesvincularEtiqueta
+);

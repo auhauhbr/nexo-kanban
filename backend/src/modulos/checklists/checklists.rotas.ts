@@ -11,9 +11,28 @@ import {
 
 export const rotasChecklists = Router();
 
-rotasChecklists.use(intermediarioDeAutenticacao);
-rotasChecklists.post("/cards/:cardId/checklists", controladorCriarChecklist);
-rotasChecklists.delete("/checklists/:id", controladorExcluirChecklist);
-rotasChecklists.post("/checklists/:checklistId/items", controladorCriarItemChecklist);
-rotasChecklists.patch("/checklist-items/:id", controladorAtualizarItemChecklist);
-rotasChecklists.delete("/checklist-items/:id", controladorExcluirItemChecklist);
+rotasChecklists.post(
+  "/cards/:cardId/checklists",
+  intermediarioDeAutenticacao,
+  controladorCriarChecklist
+);
+rotasChecklists.delete(
+  "/checklists/:id",
+  intermediarioDeAutenticacao,
+  controladorExcluirChecklist
+);
+rotasChecklists.post(
+  "/checklists/:checklistId/items",
+  intermediarioDeAutenticacao,
+  controladorCriarItemChecklist
+);
+rotasChecklists.patch(
+  "/checklist-items/:id",
+  intermediarioDeAutenticacao,
+  controladorAtualizarItemChecklist
+);
+rotasChecklists.delete(
+  "/checklist-items/:id",
+  intermediarioDeAutenticacao,
+  controladorExcluirItemChecklist
+);
