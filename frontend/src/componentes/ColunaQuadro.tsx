@@ -1,10 +1,23 @@
 import type { Lista } from "../tipos";
+import { FormularioNovoCartao } from "./FormularioNovoCartao";
 
 interface PropriedadesColunaQuadro {
   lista: Lista;
+  criandoCartao: boolean;
+  erroCriacaoCartao: string;
+  aoCriarCartao: (
+    idLista: string,
+    titulo: string,
+    descricao?: string
+  ) => Promise<unknown>;
 }
 
-export function ColunaQuadro({ lista }: PropriedadesColunaQuadro) {
+export function ColunaQuadro({
+  lista,
+  criandoCartao,
+  erroCriacaoCartao,
+  aoCriarCartao
+}: PropriedadesColunaQuadro) {
   return (
     <section className="coluna-quadro">
       <header>
@@ -26,6 +39,13 @@ export function ColunaQuadro({ lista }: PropriedadesColunaQuadro) {
           ))
         )}
       </div>
+      <FormularioNovoCartao
+        aoCriar={(titulo, descricao) =>
+          aoCriarCartao(lista.id, titulo, descricao)
+        }
+        criando={criandoCartao}
+        erro={erroCriacaoCartao}
+      />
     </section>
   );
 }
