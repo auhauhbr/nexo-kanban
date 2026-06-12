@@ -19,3 +19,21 @@ export const buscarQuadro = async (idQuadro: string) => {
   );
   return resposta.board;
 };
+
+export const atualizarTituloQuadro = async ({
+  idQuadro,
+  titulo
+}: {
+  idQuadro: string;
+  titulo: string;
+}) => {
+  const { data: resposta } = await api.patch<{ board: Quadro }>(
+    `/boards/${idQuadro}`,
+    { title: titulo }
+  );
+  return resposta.board;
+};
+
+export const excluirQuadro = async (idQuadro: string) => {
+  await api.delete(`/boards/${idQuadro}`);
+};
