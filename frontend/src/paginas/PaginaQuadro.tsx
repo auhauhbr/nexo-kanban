@@ -11,7 +11,11 @@ import { ColunaQuadro } from "../componentes/ColunaQuadro";
 import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
-import type { Cartao } from "../tipos";
+import type { Cartao, Quadro } from "../tipos";
+import {
+  moverCartaoNoQuadro,
+  type MovimentoCartao
+} from "../utilitarios/mover-cartao";
 
 export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
@@ -21,6 +25,9 @@ export function PaginaQuadro() {
     cartao: Cartao;
     nomeLista: string;
   } | null>(null);
+  const [idCartaoArrastado, definirIdCartaoArrastado] = useState<string | null>(
+    null
+  );
   const consultaQuadro = useQuery({
     queryKey: chaveConsultaQuadro,
     queryFn: () => apiQuadros.buscarQuadro(idQuadro),
@@ -39,6 +46,39 @@ export function PaginaQuadro() {
   const edicaoCartao = useMutation({
     mutationFn: apiCartoes.atualizarCartao,
     onSuccess: () =>
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+  });
+  const movimentacaoCartao = useMutation({
+    mutationFn: ({ idCartao, idListaDestino, posicaoDestino }: MovimentoCartao) =>
+      apiCartoes.moverCartao({
+        idCartao,
+        idLista: idListaDestino,
+        posicao: posicaoDestino
+      }),
+    onMutate: async (movimento) => {
+      await clienteConsultas.cancelQueries({ queryKey: chaveConsultaQuadro });
+      const quadroAnterior = clienteConsultas.getQueryData<Quadro>(
+        chaveConsultaQuadro
+      );
+
+      if (quadroAnterior) {
+        clienteConsultas.setQueryData(
+          chaveConsultaQuadro,
+          moverCartaoNoQuadro(quadroAnterior, movimento)
+        );
+      }
+
+      return { quadroAnterior };
+    },
+    onError: (_erro, _movimento, contexto) => {
+      if (contexto?.quadroAnterior) {
+        clienteConsultas.setQueryData(
+          chaveConsultaQuadro,
+          contexto.quadroAnterior
+        );
+      }
+    },
+    onSettled: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
   const mensagemErroCriacao = criacaoLista.error
@@ -74,6 +114,18 @@ export function PaginaQuadro() {
   }
 
   const quadro = consultaQuadro.data;
+  const soltarCartao = (idListaDestino: string, posicaoDestino: number) => {
+    if (!idCartaoArrastado || movimentacaoCartao.isPending) {
+      return;
+    }
+
+    movimentacaoCartao.mutate({
+      idCartao: idCartaoArrastado,
+      idListaDestino,
+      posicaoDestino
+    });
+    definirIdCartaoArrastado(null);
+  };
 
   return (
     <main className="pagina-quadro">
@@ -98,6 +150,11 @@ export function PaginaQuadro() {
             </p>
           </div>
         </div>
+        {movimentacaoCartao.isError ? (
+          <p className="erro-movimentacao">
+            Não foi possível mover o cartão. A posição anterior foi restaurada.
+          </p>
+        ) : null}
       </section>
 
       <section className="area-listas">
@@ -109,6 +166,9 @@ export function PaginaQuadro() {
             aoSelecionarCartao={(cartao, nomeLista) =>
               definirCartaoSelecionado({ cartao, nomeLista })
             }
+            aoFinalizarArraste={() => definirIdCartaoArrastado(null)}
+            aoIniciarArraste={definirIdCartaoArrastado}
+            aoSoltarCartao={soltarCartao}
             criandoCartao={
               criacaoCartao.isPending &&
               criacaoCartao.variables?.idLista === lista.id
@@ -120,6 +180,7 @@ export function PaginaQuadro() {
             }
             key={lista.id}
             lista={lista}
+            idCartaoArrastado={idCartaoArrastado}
           />
         ))}
         <FormularioNovaLista
