@@ -34,6 +34,12 @@ Inicie somente o backend:
 npm run dev:backend
 ```
 
+Inicie somente o frontend:
+
+```bash
+npm run dev:frontend
+```
+
 Quando o Docker Desktop estiver instalado, inicie o banco:
 
 ```bash
