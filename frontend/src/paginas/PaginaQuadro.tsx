@@ -11,6 +11,7 @@ import { FormularioNovaLista } from "../componentes/FormularioNovaLista";
 import { Marca } from "../componentes/Marca";
 import { MenuQuadro } from "../componentes/MenuQuadro";
 import { ModalEditarCartao } from "../componentes/ModalEditarCartao";
+import { usarNotificacoes } from "../contexto/ContextoNotificacoes";
 import { usarTempoRealQuadro } from "../hooks/usarTempoRealQuadro";
 import type { Cartao, Quadro } from "../tipos";
 import {
@@ -34,6 +35,7 @@ export function PaginaQuadro() {
   const { idQuadro = "" } = useParams();
   const navegar = useNavigate();
   const clienteConsultas = useQueryClient();
+  const { mostrarErro, mostrarSucesso } = usarNotificacoes();
   const chaveConsultaQuadro = ["quadro", idQuadro];
   const estadoTempoReal = usarTempoRealQuadro(idQuadro);
   const [cartaoSelecionado, definirCartaoSelecionado] = useState<{
@@ -56,29 +58,37 @@ export function PaginaQuadro() {
     onSuccess: () => {
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
       clienteConsultas.invalidateQueries({ queryKey: ["quadros"] });
+      mostrarSucesso("Nome do quadro atualizado.");
     }
   });
   const exclusaoQuadro = useMutation({
     mutationFn: apiQuadros.excluirQuadro,
     onSuccess: async () => {
       await clienteConsultas.invalidateQueries({ queryKey: ["quadros"] });
+      mostrarSucesso("Quadro excluído.");
       navegar("/");
     }
   });
   const criacaoLista = useMutation({
     mutationFn: (titulo: string) => apiListas.criarLista({ idQuadro, titulo }),
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Lista criada.");
+    }
   });
   const edicaoLista = useMutation({
     mutationFn: apiListas.atualizarTituloLista,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Nome da lista atualizado.");
+    }
   });
   const exclusaoLista = useMutation({
     mutationFn: apiListas.excluirLista,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Lista excluída.");
+    }
   });
   const movimentacaoLista = useMutation({
     mutationFn: ({ idLista, posicaoDestino }: MovimentoLista) =>
@@ -105,24 +115,31 @@ export function PaginaQuadro() {
           contexto.quadroAnterior
         );
       }
+      mostrarErro("Não foi possível mover a lista. A posição foi restaurada.");
     },
     onSettled: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
   });
   const criacaoCartao = useMutation({
     mutationFn: apiCartoes.criarCartao,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Cartão criado.");
+    }
   });
   const edicaoCartao = useMutation({
     mutationFn: apiCartoes.atualizarCartao,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Cartão atualizado.");
+    }
   });
   const exclusaoCartao = useMutation({
     mutationFn: apiCartoes.excluirCartao,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro });
+      mostrarSucesso("Cartão excluído.");
+    }
   });
   const movimentacaoCartao = useMutation({
     mutationFn: ({ idCartao, idListaDestino, posicaoDestino }: MovimentoCartao) =>
@@ -153,6 +170,7 @@ export function PaginaQuadro() {
           contexto.quadroAnterior
         );
       }
+      mostrarErro("Não foi possível mover o cartão. A posição foi restaurada.");
     },
     onSettled: () =>
       clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadro })
@@ -266,12 +284,6 @@ export function PaginaQuadro() {
             {rotulosTempoReal[estadoTempoReal]}
           </span>
         </div>
-        {movimentacaoCartao.isError || movimentacaoLista.isError ? (
-          <p className="erro-movimentacao">
-            Não foi possível concluir a movimentação. A posição anterior foi
-            restaurada.
-          </p>
-        ) : null}
       </section>
 
       <section className="area-listas">

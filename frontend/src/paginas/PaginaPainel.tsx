@@ -6,12 +6,14 @@ import { CartaoQuadro } from "../componentes/CartaoQuadro";
 import { FormularioNovoQuadro } from "../componentes/FormularioNovoQuadro";
 import { Marca } from "../componentes/Marca";
 import { usarAutenticacao } from "../contexto/ContextoAutenticacao";
+import { usarNotificacoes } from "../contexto/ContextoNotificacoes";
 import { obterMensagemErro } from "../utilitarios/mensagem-erro";
 
 const chaveConsultaQuadros = ["quadros"];
 
 export function PaginaPainel() {
   const { sair, usuario } = usarAutenticacao();
+  const { mostrarSucesso } = usarNotificacoes();
   const clienteConsultas = useQueryClient();
   const consultaQuadros = useQuery({
     queryKey: chaveConsultaQuadros,
@@ -19,8 +21,10 @@ export function PaginaPainel() {
   });
   const criacaoQuadro = useMutation({
     mutationFn: apiQuadros.criarQuadro,
-    onSuccess: () =>
-      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadros })
+    onSuccess: () => {
+      clienteConsultas.invalidateQueries({ queryKey: chaveConsultaQuadros });
+      mostrarSucesso("Quadro criado com sucesso.");
+    }
   });
 
   const mensagemErroCriacao = criacaoQuadro.error
