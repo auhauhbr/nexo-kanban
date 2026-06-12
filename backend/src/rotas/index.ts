@@ -8,6 +8,7 @@ import { rotasListas } from "../modulos/listas/listas.rotas.js";
 import { rotasEtiquetas } from "../modulos/etiquetas/etiquetas.rotas.js";
 import { rotasChecklists } from "../modulos/checklists/checklists.rotas.js";
 import { rotasInteracoes } from "../modulos/interacoes/interacoes.rotas.js";
+import { rotasArquivados } from "../modulos/arquivados/arquivados.rotas.js";
 
 export const rotas = Router();
 
@@ -18,6 +19,7 @@ rotas.use("/lists", rotasListas);
 rotas.use(rotasEtiquetas);
 rotas.use(rotasChecklists);
 rotas.use(rotasInteracoes);
+rotas.use(rotasArquivados);
 
 rotas.get("/health", async (_requisicao, resposta) => {
   try {

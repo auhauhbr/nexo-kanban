@@ -202,6 +202,14 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
   const todoId = (todoResponse.body.list as JsonObject).id as string;
   const doneId = (doneResponse.body.list as JsonObject).id as string;
 
+  const limitedList = await patch(
+    `/lists/${todoId}`,
+    { wipLimit: 1 },
+    owner.token
+  );
+  assert.equal(limitedList.resposta.status, 200);
+  assert.equal((limitedList.body.list as JsonObject).wipLimit, 1);
+
   const firstCard = await post(
     `/lists/${todoId}/cards`,
     { title: "First" },
@@ -351,6 +359,19 @@ test("CRUD do Kanban preserva proprietário e posições ordenadas", async () =>
   const listsAfterArchive = (detailAfterArchive.body.board as JsonObject)
     .lists as JsonObject[];
   assert.deepEqual((listsAfterArchive[0]?.cards as JsonObject[]), []);
+
+  const archivedItems = await get(`/boards/${boardId}/archived`, owner.token);
+  assert.equal(archivedItems.resposta.status, 200);
+  const archivedCards = ((archivedItems.body.archived as JsonObject).cards as JsonObject[]);
+  assert.equal(archivedCards.some((card) => card.id === firstCardId), true);
+
+  const restoredCard = await patch(`/cards/${firstCardId}/restaurar`, {}, owner.token);
+  assert.equal(restoredCard.resposta.status, 200);
+
+  const archivedList = await patch(`/lists/${todoId}`, { archived: true }, owner.token);
+  assert.equal(archivedList.resposta.status, 200);
+  const restoredList = await patch(`/lists/${todoId}/restaurar`, {}, owner.token);
+  assert.equal(restoredList.resposta.status, 200);
 
   const deletedCard = await remove(`/cards/${firstCardId}`, owner.token);
   assert.equal(deletedCard.resposta.status, 204);
