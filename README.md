@@ -145,6 +145,24 @@ usuário. A assistência foi aplicada sobre a estrutura funcional do sistema e
 não substitui a implementação da API, da modelagem do banco, das regras do
 backend ou da infraestrutura Docker.
 
+## Segurança
+
+- Senhas são validadas no frontend e backend e armazenadas somente após hash
+  com bcrypt.
+- O cadastro exige no mínimo 10 caracteres, uma letra, um número e confirmação
+  visual da senha.
+- Login e cadastro possuem limitação de tentativas por endereço IP.
+- A API limita o tamanho de corpos JSON e envia cabeçalhos HTTP de segurança.
+- Tokens JWT expiram após sete dias e rotas privadas verificam o usuário
+  autenticado.
+- Arquivos `.env` são ignorados pelo Git. O repositório contém apenas
+  `.env.example`, sem credenciais utilizáveis.
+
+O token JWT permanece armazenado no `localStorage` do navegador. Para um deploy
+público com requisitos de segurança mais elevados, a evolução recomendada é
+usar cookies `HttpOnly`, `Secure` e `SameSite`, além de HTTPS, rotação de
+segredos e rate limiting compartilhado em Redis.
+
 ## Arquitetura
 
 ```mermaid
@@ -164,6 +182,15 @@ salas dos quadros pertencentes ao usuário autenticado.
 ### Aplicação completa
 
 Com o Docker Desktop em execução:
+
+Crie o arquivo local de variáveis antes da primeira execução:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edite o `.env` e defina uma senha para o PostgreSQL e um segredo JWT longo e
+aleatório. Esse arquivo não será enviado ao GitHub.
 
 ```bash
 docker compose up -d --build
