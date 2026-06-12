@@ -11,7 +11,7 @@ import { criarServidorTempoReal } from "../tempo-real/index.js";
 
 const idExecucao = `${Date.now()}-${process.pid}`;
 const prefixoEmail = `integracao-${idExecucao}`;
-const senha = "password123";
+const senha = "NexoSeguro#2026";
 
 let urlBase = "";
 const clientes: Socket[] = [];
@@ -152,6 +152,13 @@ test("autenticação cadastra, conecta e protege a rota do usuário atual", asyn
     password: "somenteletras"
   });
   assert.equal(weakPassword.resposta.status, 400);
+
+  const repeatedPassword = await post("/auth/register", {
+    name: "Repeated Password",
+    email: `${prefixoEmail}-repeated@example.com`,
+    password: "Nexo####Seguro2026"
+  });
+  assert.equal(repeatedPassword.resposta.status, 400);
 
   const user = await registerUser("Auth Integration", "auth");
 

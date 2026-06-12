@@ -5,6 +5,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { LayoutAutenticacao } from "../componentes/LayoutAutenticacao";
 import { usarAutenticacao } from "../contexto/ContextoAutenticacao";
 import { obterMensagemErro } from "../utilitarios/mensagem-erro";
+import { avaliarSenha } from "../utilitarios/forca-senha";
 
 export function PaginaCadastro() {
   const { cadastrar, usuario } = usarAutenticacao();
@@ -17,6 +18,7 @@ export function PaginaCadastro() {
   const [mostrarConfirmacao, definirMostrarConfirmacao] = useState(false);
   const [erro, definirErro] = useState("");
   const [enviando, definirEnviando] = useState(false);
+  const forcaSenha = avaliarSenha(senha);
 
   if (usuario) {
     return <Navigate to="/" replace />;
@@ -28,6 +30,11 @@ export function PaginaCadastro() {
 
     if (senha !== confirmacaoSenha) {
       definirErro("As senhas informadas não são iguais.");
+      return;
+    }
+
+    if (!forcaSenha.valida) {
+      definirErro("A senha ainda não atende a todos os requisitos de segurança.");
       return;
     }
 
@@ -87,7 +94,7 @@ export function PaginaCadastro() {
             <input
               autoComplete="new-password"
               id="register-password"
-              minLength={10}
+              minLength={12}
               maxLength={72}
               onChange={(evento) => definirSenha(evento.target.value)}
               required
@@ -102,16 +109,31 @@ export function PaginaCadastro() {
               {mostrarSenha ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </span>
+          <div className={`forca-senha forca-senha-${forcaSenha.nivel}`}>
+            <div className="cabecalho-forca-senha">
+              <span>Força da senha</span>
+              <strong>{senha ? forcaSenha.nivel : "digite uma senha"}</strong>
+            </div>
+            <div
+              aria-label={`Força da senha: ${forcaSenha.percentual}%`}
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={forcaSenha.percentual}
+              className="barra-forca-senha"
+              role="progressbar"
+            >
+              <span style={{ width: `${forcaSenha.percentual}%` }} />
+            </div>
+          </div>
           <small className="requisitos-senha">
-            <span className={senha.length >= 10 ? "requisito-atendido" : ""}>
-              10 caracteres
-            </span>
-            <span className={/[A-Za-zÀ-ÿ]/.test(senha) ? "requisito-atendido" : ""}>
-              uma letra
-            </span>
-            <span className={/[0-9]/.test(senha) ? "requisito-atendido" : ""}>
-              um número
-            </span>
+            {forcaSenha.requisitos.map((requisito) => (
+              <span
+                className={requisito.atendido ? "requisito-atendido" : ""}
+                key={requisito.id}
+              >
+                {requisito.rotulo}
+              </span>
+            ))}
           </small>
         </label>
 
@@ -122,7 +144,7 @@ export function PaginaCadastro() {
               autoComplete="new-password"
               id="register-password-confirmation"
               maxLength={72}
-              minLength={10}
+              minLength={12}
               onChange={(evento) => definirConfirmacaoSenha(evento.target.value)}
               required
               type={mostrarConfirmacao ? "text" : "password"}
@@ -150,9 +172,7 @@ export function PaginaCadastro() {
           disabled={
             enviando ||
             senha !== confirmacaoSenha ||
-            senha.length < 10 ||
-            !/[A-Za-zÀ-ÿ]/.test(senha) ||
-            !/[0-9]/.test(senha)
+            !forcaSenha.valida
           }
           type="submit"
         >

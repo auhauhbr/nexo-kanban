@@ -406,6 +406,68 @@ a {
   gap: 5px;
 }
 
+.forca-senha {
+  display: grid;
+  gap: 6px;
+}
+
+.cabecalho-forca-senha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #7b879c;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.cabecalho-forca-senha strong {
+  color: #667085;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.barra-forca-senha {
+  overflow: hidden;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #edf1f6;
+}
+
+.barra-forca-senha span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #d92d20;
+  transition:
+    width 220ms ease,
+    background 220ms ease;
+}
+
+.forca-senha-média .barra-forca-senha span {
+  background: #e6a000;
+}
+
+.forca-senha-forte .barra-forca-senha span {
+  background: #2f80ed;
+}
+
+.forca-senha-excelente .barra-forca-senha span {
+  background: #158b68;
+}
+
+.forca-senha-média .cabecalho-forca-senha strong {
+  color: #9b6c00;
+}
+
+.forca-senha-forte .cabecalho-forca-senha strong {
+  color: #2867b2;
+}
+
+.forca-senha-excelente .cabecalho-forca-senha strong {
+  color: #15734f;
+}
+
 .requisitos-senha span {
   padding: 3px 6px;
   border-radius: 999px;

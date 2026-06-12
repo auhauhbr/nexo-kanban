@@ -5,10 +5,15 @@ export const esquemaCadastro = z.object({
   email: z.string().trim().email().max(254).transform((email) => email.toLowerCase()),
   password: z
     .string()
-    .min(10, "A senha deve ter pelo menos 10 caracteres")
+    .min(12, "A senha deve ter pelo menos 12 caracteres")
     .max(72)
-    .regex(/[A-Za-zÀ-ÿ]/, "A senha deve conter uma letra")
+    .regex(/[a-zà-ÿ]/, "A senha deve conter uma letra minúscula")
+    .regex(/[A-ZÀ-Þ]/, "A senha deve conter uma letra maiúscula")
     .regex(/[0-9]/, "A senha deve conter um número")
+    .regex(/[^A-Za-zÀ-ÿ0-9\s]/, "A senha deve conter um caractere especial")
+    .refine((senha) => !/(.)\1{3}/i.test(senha), {
+      message: "A senha não pode repetir o mesmo caractere 4 vezes seguidas"
+    })
 });
 
 export const esquemaEntrada = z.object({
