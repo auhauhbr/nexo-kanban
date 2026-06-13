@@ -41,7 +41,7 @@ jobs:
           fi
 
       - name: Instalar dependências
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Gerar frontend
         run: npm run build --workspace frontend
