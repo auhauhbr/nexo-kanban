@@ -4,6 +4,21 @@ Nexo é uma aplicação Kanban full stack para organizar projetos em quadros,
 listas e cartões. O sistema possui autenticação, movimentação por arrastar e
 soltar, atualização em tempo real e ambiente completo com Docker.
 
+## Aplicação publicada
+
+- **Demonstração:** [https://auhauhbr.github.io/nexo-kanban/](https://auhauhbr.github.io/nexo-kanban/)
+- **Status da API:** [https://nexo-kanban.onrender.com/health](https://nexo-kanban.onrender.com/health)
+
+A versão pública utiliza uma arquitetura distribuída entre três serviços:
+
+- **GitHub Pages:** hospeda o build estático do frontend React.
+- **Render:** executa a API Node.js, as conexões Socket.io e as migrações do
+  Prisma.
+- **Neon:** fornece o banco PostgreSQL gerenciado utilizado em produção.
+
+O frontend é publicado por um workflow manual do GitHub Actions. O backend é
+atualizado automaticamente pelo Render após novos commits na branch `main`.
+
 ## Preview
 
 ### Autenticação
@@ -248,18 +263,28 @@ PostgreSQL.
 
 ## Publicação
 
-O GitHub Pages hospeda somente o frontend React. A API Node.js, o Socket.io e o
-PostgreSQL precisam ser publicados separadamente antes de ativar o Pages.
+A aplicação está publicada com o frontend, backend e banco de dados executados
+em serviços separados:
 
-Depois de publicar o backend:
+- **Frontend:** GitHub Pages, disponível em
+  [auhauhbr.github.io/nexo-kanban](https://auhauhbr.github.io/nexo-kanban/).
+- **Backend e Socket.io:** Render Web Service, disponível em
+  [nexo-kanban.onrender.com](https://nexo-kanban.onrender.com/health).
+- **Banco de dados:** PostgreSQL gerenciado pelo Neon, conectado ao backend por
+  uma variável de ambiente protegida.
 
-1. No GitHub, abra `Settings` → `Secrets and variables` → `Actions` → `Variables`.
-2. Crie `VITE_API_URL` e `VITE_SOCKET_URL` com a URL pública HTTPS do backend.
-3. Em `Settings` → `Pages`, selecione `GitHub Actions` como origem.
-4. Abra `Actions` → `Publicar frontend no GitHub Pages` → `Run workflow`.
+O workflow `Publicar frontend no GitHub Pages` gera o frontend com as variáveis
+`VITE_API_URL` e `VITE_SOCKET_URL`, prepara o artefato estático e realiza a
+publicação. No Render, o processo de deploy instala as dependências, gera o
+cliente Prisma, compila o backend, aplica migrações pendentes e inicia a API.
 
-O backend também deve permitir a origem `https://auhauhbr.github.io`. O caminho
-final do frontend será `https://auhauhbr.github.io/nexo-kanban/`.
+Credenciais e endereços sensíveis permanecem fora do repositório, armazenados
+como variáveis de ambiente nas plataformas. A API permite a origem do frontend
+publicado por meio da configuração de CORS.
+
+Por utilizar o plano gratuito do Render, a API pode entrar em modo de espera
+após um período sem acessos. A primeira requisição após esse período pode levar
+alguns segundos enquanto o serviço é reativado.
 
 ## Desenvolvimento local
 
